@@ -5,6 +5,8 @@ import { auth } from "./firebase";
 import SignIn from "./screens/SignIn";
 import SignUp from "./screens/SignUp";
 import Homepage from "./screens/Homepage";
+import PersonalKitchen from "./screens/PersonalKitchen";
+import userData from "./server/users.json";
 import "./styles.css";
 
 // Protected Route wrapper component
@@ -24,7 +26,7 @@ function PrivateRoute({ children }) {
     return <div>Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/signin" />;
+  return user ? children : <Navigate to="/" />;
 }
 
 // Auth wrapper component to handle authentication state
@@ -45,34 +47,36 @@ function AuthWrapper() {
   }
 
   // If user is authenticated, redirect to homepage
-  if (user && window.location.pathname === '/signin') {
-    return <Navigate to="/homepage" />;
+  if (user && window.location.pathname === '/') {
+    return <Navigate to="/home" />;
   }
 
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<Navigate to="/signin" />} />
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/signup" element={<SignUp />} />
+      <Route path="/" element={<SignIn />} />
+      <Route path="/signup" element={
+      
+          <SignUp />
+      } />
 
       {/* Protected Routes */}
-      <Route
-        path="/homepage"
-        element={
-          <PrivateRoute>
-            <Homepage />
-          </PrivateRoute>
-        }
-      />
+      <Route path="/home" element={
+        <PrivateRoute>
+          <Homepage />
+        </PrivateRoute>
+      } />
+      
+      <Route path="/kitchen" element={
+        <PrivateRoute>
+          <PersonalKitchen user={userData[0]} />
+        </PrivateRoute>
+      } />
 
-      {/* Fallback Route - Redirect to signin if not authenticated, homepage if authenticated */}
-      <Route 
-        path="*" 
-        element={
-          user ? <Navigate to="/homepage" /> : <Navigate to="/signin" />
-        } 
-      />
+      {/* Fallback Route */}
+      <Route path="*" element={
+        user ? <Navigate to="/home" /> : <Navigate to="/" />
+      } />
     </Routes>
   );
 }

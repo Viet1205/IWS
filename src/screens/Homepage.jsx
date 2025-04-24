@@ -21,6 +21,9 @@ function Homepage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
 
   // Default avatar URL for when author photo is not available
   const defaultAvatar = "https://img.icons8.com/ios-filled/50/ef6c00/user.png";
@@ -30,6 +33,33 @@ function Homepage() {
     setRecipes(recipesData);
     setCategories(categoriesData);
     setFilteredRecipes(recipesData);
+  }, []);
+
+  useEffect(() => {
+    // Find the first user from users.json as demo user
+    // In a real app, this would come from authentication
+    setCurrentUser(users[0]);
+  }, [users]);
+
+  useEffect(() => {
+    // Fetch user information
+    const fetchUserInfo = async () => {
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userInfo = {
+            name: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL
+          };
+          setUserInfo(userInfo);
+        }
+      } catch (err) {
+        console.error("Error fetching user info:", err);
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
   // Handle search suggestions with debouncing
@@ -60,10 +90,11 @@ function Homepage() {
     setIsLoading(false);
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (e) => {
+    e.stopPropagation(); // Prevent event bubbling
     try {
       await signOut(auth);
-      navigate("/");
+      navigate('/');
     } catch (err) {
       console.error("Error signing out:", err);
     }
@@ -114,6 +145,29 @@ function Homepage() {
     // Return the author's photoURL if found, otherwise return the default avatar
     return author && author.photoURL ? author.photoURL : defaultAvatar;
   };
+
+  const toggleDropdown = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setShowDropdown(!showDropdown);
+  };
+
+  const handlePersonalKitchen = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setShowDropdown(false);
+    navigate('/kitchen');
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowDropdown(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="homepage">
@@ -257,9 +311,34 @@ function Homepage() {
               />
             )}
           </div>
-          <button onClick={handleSignOut} className="logout-button">
-            Sign Out
-          </button>
+          
+          <div className="user-dropdown" onClick={toggleDropdown}>
+            <img 
+              src={userInfo?.photoURL || "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7"} 
+              alt={userInfo?.displayName || "User"} 
+              className="user-avatar"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7";
+              }}
+            />
+            <div className={`dropdown-menu ${showDropdown ? 'active' : ''}`}>
+              <div className="dropdown-item" onClick={handlePersonalKitchen}>
+                <img 
+                  src="https://img.icons8.com/ios-filled/50/ef6c00/kitchen.png" 
+                  alt="Kitchen"
+                />
+                <span>Personal Kitchen</span>
+              </div>
+              <div className="dropdown-item" onClick={handleSignOut}>
+                <img 
+                  src="https://img.icons8.com/ios-filled/50/ef6c00/exit.png" 
+                  alt="Sign Out"
+                />
+                <span>Sign Out</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {!isSearching ? (
