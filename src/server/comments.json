@@ -54,6 +54,26 @@
     "userId": "user_001",
     "content": "Perfect comfort food for cold days!",
     "createdAt": "2025-04-22T16:00:00Z"
+  },
+  {
+    "id": "comment_1745599208774",
+    "recipeId": "1",
+    "authorId": "john_doe",
+    "content": "This recipe was amazing! Thanks for sharing.",
+    "createdAt": "2025-04-25T16:40:08.774Z"
+  },
+  {
+    "id": "comment_1745599360388",
+    "recipeId": "1",
+    "authorId": "john_doe",
+    "content": "This recipe was amazing! Thanks for sharing.",
+    "createdAt": "2025-04-25T16:42:40.388Z"
+  },
+  {
+    "id": "comment_1745599533795",
+    "recipeId": "2",
+    "authorId": "jane_smith",
+    "content": "Love this recipe! I added a bit of lemon and it turned out great.",
+    "createdAt": "2025-04-25T16:45:33.795Z"
   }
 ]
-  

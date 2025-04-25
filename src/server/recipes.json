@@ -1,129 +1,171 @@
 [
-    {
-      "id": "dinner-1",
-      "name": "Garlic Butter Steak",
-      "author": "Chef Anna",
-      "category": "dinner",
-      "image": "https://th.bing.com/th/id/OIP.s79SRapmGEXyiwaexIPV1gHaE8?w=203&h=135&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "25 mins",
-      "people": 2,
-      "ingredients": [
-        "2 ribeye steaks",
-        "3 tbsp butter",
-        "4 cloves garlic",
-        "Salt and pepper"
-      ],
-      "instruction": "Season steaks with salt & pepper. In a skillet, melt butter and sauté garlic. Cook steaks 3–4 min each side; baste with garlic butter."
-    },
-    {
-      "id": "lunch-1",
-      "name": "Grilled Chicken Wrap",
-      "author": "Chef Ben",
-      "category": "lunch",
-      "image": "https://th.bing.com/th/id/OIP.jGZHb7lSicUwVT0ItXhQlgHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "20 mins",
-      "people": 2,
-      "ingredients": [
-        "2 tortillas",
-        "1 grilled chicken breast",
-        "Lettuce, tomato, mayo"
-      ],
-      "instruction": "Slice chicken; assemble wrap with lettuce, tomato, chicken, and mayo; roll tightly."
-    },
-    {
-      "id": "breakfast-1",
-      "name": "Avocado Toast",
-      "author": "Chef Cara",
-      "category": "breakfast",
-      "image": "https://th.bing.com/th/id/OIP.86B1JjdpU8Ia7lrWyV1z2wHaJ1?w=203&h=270&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "10 mins",
-      "people": 1,
-      "ingredients": [
-        "2 slices bread",
-        "1 ripe avocado",
-        "Lemon juice, salt, pepper"
-      ],
-      "instruction": "Toast bread; mash avocado with lemon, salt & pepper; spread on toast."
-    },
-    {
-      "id": "snacks-1",
-      "name": "Spicy Roasted Nuts",
-      "author": "Chef Dan",
-      "category": "snacks",
-      "image": "https://th.bing.com/th/id/OIP.C6W3rxgZfTkJYeczjUPo2AHaLG?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "15 mins",
-      "people": 4,
-      "ingredients": [
-        "2 cups mixed nuts",
-        "1 tbsp chili powder",
-        "1 tbsp olive oil",
-        "Salt"
-      ],
-      "instruction": "Toss nuts in oil & spices; roast at 180 °C for 10–12 min."
-    },
-    {
-      "id": "vegetarian-1",
-      "name": "Stuffed Bell Peppers",
-      "author": "Chef Eva",
-      "category": "vegetarian",
-      "image": "https://th.bing.com/th/id/OIP.yy54d_lYccyG1yCjnuwjugHaJ4?w=203&h=270&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "45 mins",
-      "people": 4,
-      "ingredients": [
-        "4 bell peppers",
-        "1 cup rice",
-        "1 can black beans",
-        "Cheese, spices"
-      ],
-      "instruction": "Cook rice; mix with beans & spices; stuff peppers; top with cheese; bake at 190 °C for 20 min."
-    },
-    {
-      "id": "dessert-1",
-      "name": "Chocolate Mousse",
-      "author": "Chef Finn",
-      "category": "dessert",
-      "image": "https://th.bing.com/th/id/OIP.1qdSoNmu88ZUD1W6YWj13gHaJT?w=203&h=256&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "2 hours 30 mins",
-      "people": 4,
-      "ingredients": [
-        "200g dark chocolate",
-        "3 eggs, separated",
-        "1/2 cup cream",
-        "2 tbsp sugar"
-      ],
-      "instruction": "Melt chocolate; whip yolks with sugar; fold in whites and whipped cream; chill 2 hr."
-    },
-    {
-      "id": "salad-1",
-      "name": "Quinoa & Kale Salad",
-      "author": "Chef Gia",
-      "category": "salad",
-      "image": "https://th.bing.com/th/id/OIP.CYJtKd_bg9wZ1GnHpAp9wQHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "30 mins",
-      "people": 4,
-      "ingredients": [
-        "1 cup cooked quinoa",
-        "2 cups chopped kale",
-        "Cherry tomatoes",
-        "Vinaigrette"
-      ],
-      "instruction": "Toss all ingredients with vinaigrette and serve."
-    },
-    {
-      "id": "soup-1",
-      "name": "Tomato Basil Soup",
-      "author": "Chef Hugo",
-      "category": "soup",
-      "image": "https://th.bing.com/th/id/OIP._Xj4jmwmr_fmIE3tJbVFZgHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      "cookingTime": "40 mins",
-      "people": 6,
-      "ingredients": [
-        "6 ripe tomatoes",
-        "1 onion",
-        "2 cloves garlic",
-        "Fresh basil, cream"
-      ],
-      "instruction": "Sauté onion & garlic; add chopped tomatoes; simmer 20 min; blend; stir in basil & cream."
-    }
-  ]
-  
+  {
+    "id": "dinner-1",
+    "name": "Garlic Butter Steak",
+    "author": "Chef Anna",
+    "category": "dinner",
+    "image": "https://th.bing.com/th/id/OIP.s79SRapmGEXyiwaexIPV1gHaE8?w=203&h=135&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "25 mins",
+    "people": 2,
+    "ingredients": [
+      "2 ribeye steaks",
+      "3 tbsp butter",
+      "4 cloves garlic",
+      "Salt and pepper"
+    ],
+    "instruction": "Season steaks with salt & pepper. In a skillet, melt butter and sauté garlic. Cook steaks 3–4 min each side; baste with garlic butter."
+  },
+  {
+    "id": "lunch-1",
+    "name": "Grilled Chicken Wrap",
+    "author": "Chef Ben",
+    "category": "lunch",
+    "image": "https://th.bing.com/th/id/OIP.jGZHb7lSicUwVT0ItXhQlgHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "20 mins",
+    "people": 2,
+    "ingredients": [
+      "2 tortillas",
+      "1 grilled chicken breast",
+      "Lettuce, tomato, mayo"
+    ],
+    "instruction": "Slice chicken; assemble wrap with lettuce, tomato, chicken, and mayo; roll tightly."
+  },
+  {
+    "id": "breakfast-1",
+    "name": "Avocado Toast",
+    "author": "Chef Cara",
+    "category": "breakfast",
+    "image": "https://th.bing.com/th/id/OIP.86B1JjdpU8Ia7lrWyV1z2wHaJ1?w=203&h=270&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "10 mins",
+    "people": 1,
+    "ingredients": [
+      "2 slices bread",
+      "1 ripe avocado",
+      "Lemon juice, salt, pepper"
+    ],
+    "instruction": "Toast bread; mash avocado with lemon, salt & pepper; spread on toast."
+  },
+  {
+    "id": "snacks-1",
+    "name": "Spicy Roasted Nuts",
+    "author": "Chef Dan",
+    "category": "snacks",
+    "image": "https://th.bing.com/th/id/OIP.C6W3rxgZfTkJYeczjUPo2AHaLG?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "15 mins",
+    "people": 4,
+    "ingredients": [
+      "2 cups mixed nuts",
+      "1 tbsp chili powder",
+      "1 tbsp olive oil",
+      "Salt"
+    ],
+    "instruction": "Toss nuts in oil & spices; roast at 180 °C for 10–12 min."
+  },
+  {
+    "id": "vegetarian-1",
+    "name": "Stuffed Bell Peppers",
+    "author": "Chef Eva",
+    "category": "vegetarian",
+    "image": "https://th.bing.com/th/id/OIP.yy54d_lYccyG1yCjnuwjugHaJ4?w=203&h=270&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "45 mins",
+    "people": 4,
+    "ingredients": [
+      "4 bell peppers",
+      "1 cup rice",
+      "1 can black beans",
+      "Cheese, spices"
+    ],
+    "instruction": "Cook rice; mix with beans & spices; stuff peppers; top with cheese; bake at 190 °C for 20 min."
+  },
+  {
+    "id": "dessert-1",
+    "name": "Chocolate Mousse",
+    "author": "Chef Finn",
+    "category": "dessert",
+    "image": "https://th.bing.com/th/id/OIP.1qdSoNmu88ZUD1W6YWj13gHaJT?w=203&h=256&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "2 hours 30 mins",
+    "people": 4,
+    "ingredients": [
+      "200g dark chocolate",
+      "3 eggs, separated",
+      "1/2 cup cream",
+      "2 tbsp sugar"
+    ],
+    "instruction": "Melt chocolate; whip yolks with sugar; fold in whites and whipped cream; chill 2 hr."
+  },
+  {
+    "id": "salad-1",
+    "name": "Quinoa & Kale Salad",
+    "author": "Chef Gia",
+    "category": "salad",
+    "image": "https://th.bing.com/th/id/OIP.CYJtKd_bg9wZ1GnHpAp9wQHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "30 mins",
+    "people": 4,
+    "ingredients": [
+      "1 cup cooked quinoa",
+      "2 cups chopped kale",
+      "Cherry tomatoes",
+      "Vinaigrette"
+    ],
+    "instruction": "Toss all ingredients with vinaigrette and serve."
+  },
+  {
+    "id": "soup-1",
+    "name": "Tomato Basil Soup",
+    "author": "Chef Hugo",
+    "category": "soup",
+    "image": "https://th.bing.com/th/id/OIP._Xj4jmwmr_fmIE3tJbVFZgHaLH?w=203&h=304&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+    "cookingTime": "40 mins",
+    "people": 6,
+    "ingredients": [
+      "6 ripe tomatoes",
+      "1 onion",
+      "2 cloves garlic",
+      "Fresh basil, cream"
+    ],
+    "instruction": "Sauté onion & garlic; add chopped tomatoes; simmer 20 min; blend; stir in basil & cream."
+  },
+  {
+    "id": "soup-11"
+  },
+  {
+    "id": "soup-111"
+  },
+  {
+    "id": "soup-1111",
+    "author": "john_doe",
+    "category": "Dessert",
+    "image": "",
+    "ingredients": [
+      "2 eggs",
+      "1 cup sugar",
+      "1 tsp vanilla"
+    ],
+    "instruction": "Mix all ingredients, bake at 180°C for 30 minutes.",
+    "name": "Vanilla Cake"
+  },
+  {
+    "id": "soup-11111",
+    "author": "chef_mario",
+    "category": "Italian",
+    "image": "base64encodedImageHere",
+    "ingredients": [
+      "tomato",
+      "basil",
+      "mozzarella"
+    ],
+    "instruction": "Mix ingredients and bake at 180C for 20 minutes.",
+    "name": "Margherita Pizza"
+  },
+  {
+    "id": "soup-111111",
+    "author": "việt bùi",
+    "category": "dinner",
+    "image": "data:image/jpeg;base64,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",
+    "ingredients": [
+      "1"
+    ],
+    "instruction": "1",
+    "name": "Asian Cook"
+  }
+]

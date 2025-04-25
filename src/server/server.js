@@ -115,8 +115,11 @@ app.post("/api/recipes", async (req, res) => {
     };
     recipes.push(newRecipe);
     await writeFile(recipesFile, recipes);
+    
+    console.log("[✅ Recipe Created]", newRecipe); // Success log
     res.status(201).json(newRecipe);
   } catch (err) {
+    console.error("[❌ Failed to Create Recipe]", err); // Error log
     res.status(500).json({ error: "Failed to create recipe" });
   }
 });
@@ -462,6 +465,48 @@ app.get("/api/suggestions", async (req, res) => {
   } catch (err) {
     console.error('Suggestions error:', err);
     res.status(500).json({ error: "Failed to get suggestions" });
+  }
+});
+
+// Get specific recipe by ID
+app.get("/api/recipes/:id", async (req, res) => {
+  try {
+    const recipes = await readFile(recipesFile);
+    const id = parseInt(req.params.id);
+    const recipe = recipes.find((recipe) => recipe.id === id);
+    
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Get additional data for the recipe
+    const [comments, likes] = await Promise.all([
+      readFile(commentsFile),
+      readFile(likesFile)
+    ]);
+
+    // Get comments for this recipe
+    const recipeComments = comments.filter(
+      (comment) => comment.recipeId === id.toString()
+    );
+
+    // Get likes count for this recipe
+    const recipeLikes = likes.filter(
+      (like) => like.recipeId === id.toString()
+    );
+
+    // Combine all data
+    const recipeWithDetails = {
+      ...recipe,
+      comments: recipeComments,
+      likes: recipeLikes.length,
+      isLiked: false // Default value, should be updated based on user auth
+    };
+
+    res.json(recipeWithDetails);
+  } catch (err) {
+    console.error("[❌ Failed to fetch recipe]", err);
+    res.status(500).json({ error: "Failed to fetch recipe" });
   }
 });
 

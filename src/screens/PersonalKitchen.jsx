@@ -185,33 +185,39 @@ function PersonalKitchen() {
       alert('Please enter cooking instructions');
       return;
     }
-    
+  
     try {
       const formData = {
         name: recipeForm.name,
         author: userInfo.displayName,
         category: recipeForm.category,
-        image: recipeForm.imagePreview,
+        image: recipeForm.imagePreview,  // Assuming base64 image
         ingredients: recipeForm.ingredients.filter(ing => ing.trim() !== ''),
         instruction: recipeForm.instruction,
         cookingTime: recipeForm.cookingTime,
         people: parseInt(recipeForm.people)
       };
-
-      const response = await fetch('/api/recipes', {
+  
+      console.log("Sending data to server:", formData);  // Log data before sending
+  
+      const response = await fetch('http://localhost:5000/api/recipes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
+        const errorText = await response.text();  // Get the error response text
+        console.error(`Failed to save recipe: ${response.statusText}`, errorText);
         throw new Error(`Failed to save recipe: ${response.statusText}`);
       }
-
+  
       const savedRecipe = await response.json();
-      
+  
+      console.log("Saved recipe:", savedRecipe);  // Log the saved recipe response
+  
       // Reset form after successful save
       setRecipeForm({
         name: '',
@@ -223,14 +229,16 @@ function PersonalKitchen() {
         image: null,
         imagePreview: null
       });
-      
+  
       alert('Recipe saved successfully!');
-      navigate('/recipe/' + savedRecipe._id);
+      navigate('/recipe/' + savedRecipe.id);  // Assuming the saved recipe has an 'id'
+  
     } catch (error) {
       console.error('Error saving recipe:', error);
       alert('Failed to save recipe. Please try again.');
     }
   };
+  
 
   const renderRecipeMakingScreen = () => (
     <div className="recipe-making-container">

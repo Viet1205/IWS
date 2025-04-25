@@ -6,6 +6,7 @@ import SignIn from "./screens/SignIn";
 import SignUp from "./screens/SignUp";
 import Homepage from "./screens/Homepage";
 import PersonalKitchen from "./screens/PersonalKitchen";
+import RecipeDetail from "./screens/RecipeDetail";
 import userData from "./server/users.json";
 import "./styles.css";
 
@@ -70,6 +71,12 @@ function AuthWrapper() {
       <Route path="/kitchen" element={
         <PrivateRoute>
           <PersonalKitchen user={userData[0]} />
+        </PrivateRoute>
+      } />
+
+      <Route path="/recipe/:id" element={
+        <PrivateRoute>
+          <RecipeDetail />
         </PrivateRoute>
       } />
 
