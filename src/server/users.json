@@ -1,16 +1,16 @@
 [
   {
-    "id": "user_001",
-    "displayName": "Chef Anna",
-    "email": "chef.anna@cooking.com",
-    "photoURL": "https://th.bing.com/th/id/OIP.31AVBjzOsvjDvacUARHvFgHaJB?w=137&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-    "bio": "Professional chef specializing in steaks and grills",
+    "uid": "user_001",
+    "displayName": "Alex",
+    "email": "chef.anna.updated@cooking.com",
+    "photoURL": "https://new-photo-url.com/photo.jpg",
+    "bio": "Updated bio for Chef Anna",
     "createdAt": "2025-04-20T10:00:00Z",
-    "kitchenFriends": 1,
-    "followers": 1
+    "kitchenFriends": 2,
+    "followers": 2
   },
   {
-    "id": "user_002",
+    "uid": "user_002",
     "displayName": "Chef Ben",
     "email": "chef.ben@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.4AatdE4hjxADishQmC3RfgHaLW?w=115&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -20,7 +20,7 @@
     "followers": 1
   },
   {
-    "id": "user_003",
+    "uid": "user_003",
     "displayName": "Chef Cara",
     "email": "chef.cara@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.DeRZwY_lsOgcsif-HopeAAHaHa?w=172&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -30,7 +30,7 @@
     "followers": 1
   },
   {
-    "id": "user_004",
+    "uid": "user_004",
     "displayName": "Chef Dan",
     "email": "chef.dan@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.FZjQrmD6NqUyat42UXBh9QHaLH?w=135&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -40,7 +40,7 @@
     "followers": 1
   },
   {
-    "id": "user_005",
+    "uid": "user_005",
     "displayName": "Chef Eva",
     "email": "chef.eva@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.f32yoHSVZwr96sLz1WgI0gHaF0?w=236&h=185&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -50,7 +50,7 @@
     "followers": 1
   },
   {
-    "id": "user_006",
+    "uid": "user_006",
     "displayName": "Chef Finn",
     "email": "chef.finn@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.n3t6u1ojfAJMdkakpvcJ7AHaJQ?w=98&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -60,7 +60,7 @@
     "followers": 1
   },
   {
-    "id": "user_007",
+    "uid": "user_007",
     "displayName": "Chef Gia",
     "email": "chef.gia@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.Ofi3dMYJYVTua9yh9drVNAHaLJ?w=115&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -70,7 +70,7 @@
     "followers": 1
   },
   {
-    "id": "user_008",
+    "uid": "user_008",
     "displayName": "Chef Hugo",
     "email": "chef.hugo@cooking.com",
     "photoURL": "https://th.bing.com/th/id/OIP.MVu72PNupc_aFdy-Lm8DRgHaEK?w=312&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
@@ -80,4 +80,3 @@
     "followers": 1
   }
 ]
-  
