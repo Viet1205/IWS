@@ -7,6 +7,7 @@ import recipesData from "../server/recipes.json";
 import categoriesData from "../server/categories.json";
 import userData from "../server/users.json";
 import SearchSuggestions from "../components/SearchSuggestions";
+import '../styles/RecipeDetails.css';
 
 function Homepage() {
   const navigate = useNavigate();
@@ -24,6 +25,8 @@ function Homepage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Default avatar URL for when author photo is not available
   const defaultAvatar = "https://img.icons8.com/ios-filled/50/ef6c00/user.png";
@@ -168,6 +171,31 @@ function Homepage() {
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
+
+  const handleRecipeClick = (recipe) => {
+    setSelectedRecipe(recipe);
+    setIsSearching(false);
+  };
+
+  const handleBackToRecipes = () => {
+    setSelectedRecipe(null);
+  };
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+  };
+
+  const handleShare = () => {
+    alert('Sharing recipe: ' + selectedRecipe.name);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleAddToCollection = () => {
+    alert('Adding to collection: ' + selectedRecipe.name);
+  };
 
   return (
     <div className="homepage">
@@ -341,7 +369,75 @@ function Homepage() {
           </div>
         </div>
 
-        {!isSearching ? (
+        {selectedRecipe ? (
+          <div className="recipe-details-container">
+            <img src={selectedRecipe.image} alt={selectedRecipe.name} className="recipe-main-image" />
+
+            <div className="recipe-header">
+              <h1 className="recipe-title">{selectedRecipe.name}</h1>
+              <div className="recipe-meta">
+                <span className="recipe-tag">{selectedRecipe.category}</span>
+                <div className="recipe-stats">
+                  <span className="comment-count">Đã có {selectedRecipe.comments || 0} bình luận</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="author-section">
+              <img 
+                src={selectedRecipe.authorPhoto || "https://img.icons8.com/ios-filled/50/ef6c00/user.png"}
+                alt={selectedRecipe.author}
+                className="author-avatar"
+              />
+              <span className="author-name">{selectedRecipe.author}</span>
+            </div>
+
+            <div className="recipe-actions">
+              <button className="action-button save-button" onClick={handleSave}>
+                <span>{isSaved ? 'Đã Lưu' : 'Lưu Món'}</span>
+              </button>
+              <button className="action-button" onClick={handleAddToCollection}>
+                <span>Thêm vào bộ sưu tập</span>
+              </button>
+              <button className="action-button" onClick={handleShare}>
+                <span>Chia sẻ</span>
+              </button>
+              <button className="action-button" onClick={handlePrint}>
+                <span>In</span>
+              </button>
+            </div>
+
+            <div className="recipe-sections">
+              <div className="ingredients-section">
+                <h2>Nguyên Liệu</h2>
+                <div className="servings-info">
+                  <span>{selectedRecipe.people || 2} người</span>
+                </div>
+                <ul className="ingredients-list">
+                  {(selectedRecipe.ingredients || []).map((ingredient, index) => (
+                    <li key={index} className="ingredient-item">
+                      <span>{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="instructions-section">
+                <h2>Hướng dẫn cách làm</h2>
+                <div className="cooking-info">
+                  <span>⏱️ {selectedRecipe.cookingTime || '30 phút'}</span>
+                </div>
+                <div className="instruction-step">
+                  <p>{selectedRecipe.instruction || 'No instructions available.'}</p>
+                </div>
+              </div>
+            </div>
+
+            <button className="back-button" onClick={handleBackToRecipes}>
+              Quay lại
+            </button>
+          </div>
+        ) : !isSearching ? (
           <>
             <div className="categories-container">
               <h2 className="categories-heading">Categories</h2>
@@ -359,7 +455,12 @@ function Homepage() {
               <h3>See what everyone is cooking!</h3>
               <div className="recipe-grid">
                 {filteredRecipes.map((recipe) => (
-                  <div key={recipe.id} className="recipe-card">
+                  <div 
+                    key={recipe.id} 
+                    className="recipe-card"
+                    onClick={() => handleRecipeClick(recipe)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <img src={recipe.image} alt={recipe.name} />
                     <div className="recipe-card-content">
                       <h4>{recipe.name}</h4>
@@ -405,7 +506,12 @@ function Homepage() {
             ) : (
               <div className="recipe-list">
                 {filteredRecipes.map((recipe) => (
-                  <div key={recipe.id} className="recipe-list-item">
+                  <div 
+                    key={recipe.id} 
+                    className="recipe-list-item"
+                    onClick={() => handleRecipeClick(recipe)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <img src={recipe.image} alt={recipe.name} className="recipe-thumbnail" />
                     <div className="recipe-details">
                       <h3>{recipe.name}</h3>

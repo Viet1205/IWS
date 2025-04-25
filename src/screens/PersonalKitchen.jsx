@@ -1,13 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import logo from "../assets/logo.jpg";
+import EditProfile from './EditProfile';
+import '../styles/EditProfile.css';
+import '../styles/RecipeMaking.css';
 
 function PersonalKitchen() {
   const navigate = useNavigate();
   const [activeItem, setActiveItem] = useState('collection');
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
+  const [recipeForm, setRecipeForm] = useState({
+    name: '',
+    category: 'dinner',
+    cookingTime: '',
+    people: 2,
+    ingredients: [''],
+    instruction: '',
+    image: null,
+    imagePreview: null
+  });
+  const fileInputRef = useRef();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
@@ -54,6 +69,306 @@ function PersonalKitchen() {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  const handleSaveProfile = async (updatedData) => {
+    try {
+      // Update the user info in your database/storage here
+      setUserInfo(prevState => ({
+        ...prevState,
+        ...updatedData
+      }));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      // Handle error (show notification, etc.)
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('Image size should be less than 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // Create an image element for compression
+        const img = new Image();
+        img.onload = () => {
+          // Create canvas for compression
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions while maintaining aspect ratio
+          const maxDimension = 1200;
+          if (width > height && width > maxDimension) {
+            height = (height * maxDimension) / width;
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress image
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to compressed base64
+          const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+          
+          setRecipeForm(prev => ({
+            ...prev,
+            image: file,
+            imagePreview: compressedImage
+          }));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddIngredient = () => {
+    setRecipeForm(prev => ({
+      ...prev,
+      ingredients: [...prev.ingredients, '']
+    }));
+  };
+
+  const handleRemoveIngredient = (index) => {
+    setRecipeForm(prev => ({
+      ...prev,
+      ingredients: prev.ingredients.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleIngredientChange = (index, value) => {
+    setRecipeForm(prev => ({
+      ...prev,
+      ingredients: prev.ingredients.map((ingredient, i) => 
+        i === index ? value : ingredient
+      )
+    }));
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!recipeForm.name.trim()) {
+      alert('Please enter a recipe title');
+      return;
+    }
+    if (!recipeForm.cookingTime.trim()) {
+      alert('Please enter cooking time');
+      return;
+    }
+    if (!recipeForm.imagePreview) {
+      alert('Please upload a recipe image');
+      return;
+    }
+    if (recipeForm.ingredients.every(ing => !ing.trim())) {
+      alert('Please add at least one ingredient');
+      return;
+    }
+    if (!recipeForm.instruction.trim()) {
+      alert('Please enter cooking instructions');
+      return;
+    }
+    
+    try {
+      const formData = {
+        name: recipeForm.name,
+        author: userInfo.displayName,
+        category: recipeForm.category,
+        image: recipeForm.imagePreview,
+        ingredients: recipeForm.ingredients.filter(ing => ing.trim() !== ''),
+        instruction: recipeForm.instruction,
+        cookingTime: recipeForm.cookingTime,
+        people: parseInt(recipeForm.people)
+      };
+
+      const response = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save recipe: ${response.statusText}`);
+      }
+
+      const savedRecipe = await response.json();
+      
+      // Reset form after successful save
+      setRecipeForm({
+        name: '',
+        category: 'dinner',
+        cookingTime: '',
+        people: 2,
+        ingredients: [''],
+        instruction: '',
+        image: null,
+        imagePreview: null
+      });
+      
+      alert('Recipe saved successfully!');
+      navigate('/recipe/' + savedRecipe._id);
+    } catch (error) {
+      console.error('Error saving recipe:', error);
+      alert('Failed to save recipe. Please try again.');
+    }
+  };
+
+  const renderRecipeMakingScreen = () => (
+    <div className="recipe-making-container">
+      <div className="recipe-making-header">
+        <h1>Create New Recipe</h1>
+      </div>
+
+      <form className="recipe-making-form" onSubmit={handleSave}>
+        <div className="form-section">
+          <div className="form-group">
+            <label>Recipe Title</label>
+            <input
+              type="text"
+              value={recipeForm.name}
+              onChange={(e) => setRecipeForm(prev => ({ ...prev, name: e.target.value }))}
+              placeholder="Enter recipe title"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Category</label>
+            <select
+              value={recipeForm.category}
+              onChange={(e) => setRecipeForm(prev => ({ ...prev, category: e.target.value }))}
+            >
+              <option value="dinner">Dinner</option>
+              <option value="lunch">Lunch</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="snacks">Snacks</option>
+              <option value="dessert">Dessert</option>
+              <option value="vegetarian">Vegetarian</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Cooking Time</label>
+            <input
+              type="text"
+              value={recipeForm.cookingTime}
+              onChange={(e) => setRecipeForm(prev => ({ ...prev, cookingTime: e.target.value }))}
+              placeholder="e.g., 30 mins"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Number of Servings</label>
+            <input
+              type="number"
+              value={recipeForm.people}
+              onChange={(e) => setRecipeForm(prev => ({ ...prev, people: e.target.value }))}
+              min="1"
+            />
+          </div>
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Recipe Image</label>
+            <div 
+              className="image-upload-section"
+              onClick={() => fileInputRef.current.click()}
+            >
+              {recipeForm.imagePreview ? (
+                <img src={recipeForm.imagePreview} alt="Recipe preview" />
+              ) : (
+                <p>Click to upload an image</p>
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Ingredients</label>
+            <div className="ingredients-list">
+              {recipeForm.ingredients.map((ingredient, index) => (
+                <div key={index} className="ingredient-item">
+                  <input
+                    type="text"
+                    value={ingredient}
+                    onChange={(e) => handleIngredientChange(index, e.target.value)}
+                    placeholder="Enter ingredient"
+                  />
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      className="remove-ingredient"
+                      onClick={() => handleRemoveIngredient(index)}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="add-ingredient"
+              onClick={handleAddIngredient}
+            >
+              + Add Ingredient
+            </button>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Instructions</label>
+            <textarea
+              value={recipeForm.instruction}
+              onChange={(e) => setRecipeForm(prev => ({ ...prev, instruction: e.target.value }))}
+              placeholder="Enter cooking instructions"
+            />
+          </div>
+        </div>
+
+        <div className="form-actions">
+          <button type="submit" className="save-recipe">
+            Save Recipe
+          </button>
+          <button
+            type="button"
+            className="cancel-recipe"
+            onClick={() => setIsCreatingRecipe(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 
   if (!userInfo) {
     return (
@@ -192,60 +507,77 @@ function PersonalKitchen() {
                 src="https://img.icons8.com/ios-filled/50/ef6c00/edit.png" 
                 alt="Edit"
               />
-              <span>{isEditing ? 'Save Changes' : 'Edit Profile'}</span>
+              <span>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</span>
             </button>
           </div>
         </div>
 
         <div className="personal-kitchen">
-          <div className="profile-header">
-            <div className="profile-cover"></div>
-            <div className="profile-info">
-              <img 
-                src={userInfo.photoURL} 
-                alt={userInfo.displayName} 
-                className="profile-avatar"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7";
-                }}
-              />
-              <div className="profile-details">
-                <h1>{userInfo.displayName}</h1>
-                <p className="bio">{userInfo.bio}</p>
-                <div className="stats">
-                  <div className="stat-item">
-                    <span className="stat-value">{userInfo.kitchenFriends}</span>
-                    <span className="stat-label">Kitchen Friends</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-value">{userInfo.followers}</span>
-                    <span className="stat-label">Followers</span>
+          {isCreatingRecipe ? (
+            renderRecipeMakingScreen()
+          ) : isEditing ? (
+            <EditProfile
+              userInfo={userInfo}
+              onSave={handleSaveProfile}
+              onCancel={handleCancelEdit}
+            />
+          ) : (
+            <>
+              <div className="profile-header">
+                <div className="profile-cover"></div>
+                <div className="profile-info">
+                  <img 
+                    src={userInfo.photoURL} 
+                    alt={userInfo.displayName} 
+                    className="profile-avatar"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7";
+                    }}
+                  />
+                  <div className="profile-details">
+                    <h1>{userInfo.displayName}</h1>
+                    <p className="bio">{userInfo.bio}</p>
+                    <div className="stats">
+                      <div className="stat-item">
+                        <span className="stat-value">{userInfo.kitchenFriends}</span>
+                        <span className="stat-label">Kitchen Friends</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-value">{userInfo.followers}</span>
+                        <span className="stat-label">Followers</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          
-          <div className="kitchen-content">
-            <div className="section">
-              <h2>About Me</h2>
-              <div className="about-details">
-                <p><strong>Email:</strong> {userInfo.email}</p>
-                <p><strong>Joined:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
+              
+              <div className="kitchen-content">
+                <div className="section">
+                  <h2>About Me</h2>
+                  <div className="about-details">
+                    <p><strong>Email:</strong> {userInfo.email}</p>
+                    <p><strong>Joined:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
 
-            <div className="section">
-              <h2>My Recipes</h2>
-              <div className="recipes-grid">
-                <div className="empty-state">
-                  <p>No recipes shared yet</p>
-                  <button className="primary-button">Share Your First Recipe</button>
+                <div className="section">
+                  <h2>My Recipes</h2>
+                  <div className="recipes-grid">
+                    <div className="empty-state">
+                      <p>No recipes shared yet</p>
+                      <button 
+                        className="primary-button"
+                        onClick={() => setIsCreatingRecipe(true)}
+                      >
+                        Share Your First Recipe
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>
