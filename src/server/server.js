@@ -345,14 +345,24 @@ app.put("/api/users/:uid", async (req, res) => {
     if (index === -1) {
       return res.status(404).json({ error: "User not found" });
     }
-    users[index] = {
+
+    // Create a new user object with updated fields
+    const updatedUser = {
       ...users[index],
-      ...req.body,
+      displayName: req.body.displayName || users[index].displayName,
+      email: req.body.email || users[index].email,
+      photoURL: req.body.photoURL, // Use the new photoURL directly
+      bio: req.body.bio || users[index].bio,
       uid: users[index].uid, // Prevent uid from being changed
+      kitchenFriends: users[index].kitchenFriends,
+      followers: users[index].followers
     };
+
+    users[index] = updatedUser;
     await writeFile(usersFile, users);
-    res.json(users[index]);
+    res.json(updatedUser);
   } catch (err) {
+    console.error('Error updating user:', err);
     res.status(500).json({ error: "Failed to update user" });
   }
 });

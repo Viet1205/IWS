@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
+import { auth, updateProfile } from '../firebase';
 import logo from "../assets/logo.jpg";
 import EditProfile from './EditProfile';
 import '../styles/EditProfile.css';
@@ -11,7 +11,9 @@ function PersonalKitchen() {
   const [activeItem, setActiveItem] = useState('collection');
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [userRecipes, setUserRecipes] = useState([]);
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [recipeForm, setRecipeForm] = useState({
     name: '',
     category: 'dinner',
@@ -24,44 +26,84 @@ function PersonalKitchen() {
   });
   const fileInputRef = useRef();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
-      if (firebaseUser) {
-        // Get user data from your users.json or create default values
-        fetch('/src/server/users.json')
-          .then(response => response.json())
-          .then(users => {
-            const existingUser = users.find(u => u.email === firebaseUser.email);
-            
-            // Combine Firebase data with local data or create defaults
-            const combinedUserInfo = {
-              id: existingUser?.id || firebaseUser.uid || Math.random().toString(36).substr(2, 9),
-              displayName: existingUser?.displayName || firebaseUser.displayName || "Add Nick Name",
-              email: existingUser?.email || firebaseUser.email || "Add Email",
-              photoURL: existingUser?.photoURL || firebaseUser.photoURL || "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-              bio: existingUser?.bio || "Add Bio",
-              createdAt: existingUser?.createdAt || firebaseUser.metadata.creationTime || new Date().toISOString(),
-              kitchenFriends: existingUser?.kitchenFriends || 0,
-              followers: existingUser?.followers || 0
-            };
+  const fetchUserRecipes = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipes/user/${userId}`);
+      if (response.ok) {
+        const recipes = await response.json();
+        setUserRecipes(recipes);
+      } else {
+        console.error('Failed to fetch user recipes');
+        setUserRecipes([]);
+      }
+    } catch (error) {
+      console.error('Error fetching user recipes:', error);
+      setUserRecipes([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            setUserInfo(combinedUserInfo);
-          })
-          .catch(error => {
-            console.error('Error loading user data:', error);
-            // Create default user info if JSON fetch fails
-            const defaultUserInfo = {
-              id: firebaseUser.uid || Math.random().toString(36).substr(2, 9),
-              displayName: firebaseUser.displayName || "Add Nick Name",
-              email: firebaseUser.email || "Add Email",
-              photoURL: firebaseUser.photoURL || "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-              bio: "Add Bio",
-              createdAt: firebaseUser.metadata.creationTime || new Date().toISOString(),
-              kitchenFriends: 0,
-              followers: 0
-            };
-            setUserInfo(defaultUserInfo);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // First try to get existing user from backend
+          const response = await fetch(`http://localhost:5000/api/users/${firebaseUser.uid}`);
+          let userData;
+          
+          if (response.ok) {
+            userData = await response.json();
+          } else if (response.status === 404) {
+            // User doesn't exist in backend, create new user
+            const createResponse = await fetch('http://localhost:5000/api/users', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                uid: firebaseUser.uid,
+                displayName: firebaseUser.displayName || "Add Nick Name",
+                email: firebaseUser.email,
+                photoURL: firebaseUser.photoURL || "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+                bio: "Add Bio",
+                kitchenFriends: 0,
+                followers: 0
+              })
+            });
+            
+            if (!createResponse.ok) {
+              throw new Error('Failed to create user in backend');
+            }
+            
+            userData = await createResponse.json();
+          } else {
+            throw new Error('Failed to fetch user data');
+          }
+
+          setUserInfo({
+            ...userData,
+            createdAt: userData.createdAt || firebaseUser.metadata.creationTime || new Date().toISOString()
           });
+
+          // Fetch user's recipes after getting user info
+          await fetchUserRecipes(firebaseUser.uid);
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          // Set default user info if backend fails
+          const defaultUserInfo = {
+            id: firebaseUser.uid,
+            displayName: firebaseUser.displayName || "Add Nick Name",
+            email: firebaseUser.email,
+            photoURL: firebaseUser.photoURL || "https://th.bing.com/th/id/OIP.YPe5zNjdWy-GukFdseuXbQHaHa?w=203&h=203&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+            bio: "Add Bio",
+            createdAt: firebaseUser.metadata.creationTime || new Date().toISOString(),
+            kitchenFriends: 0,
+            followers: 0
+          };
+          setUserInfo(defaultUserInfo);
+          setIsLoading(false);
+        }
       } else {
         navigate('/');
       }
@@ -72,15 +114,59 @@ function PersonalKitchen() {
 
   const handleSaveProfile = async (updatedData) => {
     try {
-      // Update the user info in your database/storage here
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No authenticated user found');
+      }
+
+      // First update backend
+      const response = await fetch(`http://localhost:5000/api/users/${user.uid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displayName: updatedData.displayName,
+          email: updatedData.email,
+          photoURL: updatedData.photoURL,
+          bio: updatedData.bio,
+          uid: user.uid,
+          kitchenFriends: userInfo.kitchenFriends,
+          followers: userInfo.followers
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Backend update failed:', errorData);
+        throw new Error('Failed to update profile in backend');
+      }
+
+      const updatedUser = await response.json();
+
+      // Then update Firebase profile with the new photoURL from backend
+      try {
+        await updateProfile(user, {
+          displayName: updatedUser.displayName,
+          photoURL: updatedUser.photoURL
+        });
+      } catch (firebaseError) {
+        console.error('Firebase profile update failed:', firebaseError);
+        // Don't throw error here, as the backend update was successful
+      }
+
+      // Update local state with the response from the backend
       setUserInfo(prevState => ({
         ...prevState,
-        ...updatedData
+        ...updatedUser
       }));
+
       setIsEditing(false);
+      alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      // Handle error (show notification, etc.)
+      alert(`Failed to update profile: ${error.message}`);
+      // Don't close the edit mode on error so user can try again
     }
   };
 
@@ -378,6 +464,22 @@ function PersonalKitchen() {
     </div>
   );
 
+  const RecipeCard = ({ recipe }) => (
+    <div className="recipe-card" onClick={() => navigate(`/recipe/${recipe.id}`)}>
+      <div className="recipe-card-image">
+        <img src={recipe.image} alt={recipe.name} />
+      </div>
+      <div className="recipe-card-content">
+        <h3>{recipe.name}</h3>
+        <div className="recipe-card-meta">
+          <span>⏱️ {recipe.cookingTime}</span>
+          <span>👥 {recipe.people} servings</span>
+        </div>
+        <div className="recipe-card-category">{recipe.category}</div>
+      </div>
+    </div>
+  );
+
   if (!userInfo) {
     return (
       <div className="personal-kitchen-empty">
@@ -572,15 +674,23 @@ function PersonalKitchen() {
                 <div className="section">
                   <h2>My Recipes</h2>
                   <div className="recipes-grid">
-                    <div className="empty-state">
-                      <p>No recipes shared yet</p>
-                      <button 
-                        className="primary-button"
-                        onClick={() => setIsCreatingRecipe(true)}
-                      >
-                        Share Your First Recipe
-                      </button>
-                    </div>
+                    {isLoading ? (
+                      <div className="loading-state">Loading recipes...</div>
+                    ) : userRecipes.length > 0 ? (
+                      userRecipes.map(recipe => (
+                        <RecipeCard key={recipe.id} recipe={recipe} />
+                      ))
+                    ) : (
+                      <div className="empty-state">
+                        <p>No recipes shared yet</p>
+                        <button 
+                          className="primary-button"
+                          onClick={() => setIsCreatingRecipe(true)}
+                        >
+                          Share Your First Recipe
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

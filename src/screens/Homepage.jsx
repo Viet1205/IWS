@@ -67,46 +67,27 @@ function Homepage() {
 
   // Handle search suggestions with debouncing
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (!searchQuery || !searchQuery.trim()) {
       setSearchSuggestions([]);
       return;
     }
 
     const suggestions = recipes.filter(recipe => 
-      recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (recipe.name && recipe.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (recipe.category && recipe.category.toLowerCase().includes(searchQuery.toLowerCase()))
     ).slice(0, 5);
 
     setSearchSuggestions(suggestions);
   }, [searchQuery, recipes]);
 
-  const performSearch = (query) => {
-    setIsLoading(true);
-    setIsSearching(true);
-    
-    const results = recipes.filter(recipe =>
-      recipe.name.toLowerCase().includes(query.toLowerCase()) ||
-      recipe.category.toLowerCase().includes(query.toLowerCase())
-    );
-
-    setFilteredRecipes(results);
-    setIsLoading(false);
-  };
-
-  const handleSignOut = async (e) => {
-    e.stopPropagation(); // Prevent event bubbling
-    try {
-      await signOut(auth);
-      navigate('/');
-    } catch (err) {
-      console.error("Error signing out:", err);
-    }
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
+    if (!searchQuery || !searchQuery.trim()) {
+      setFilteredRecipes(recipes);
+      return;
+    }
     setShowSuggestions(false);
-    performSearch(searchQuery);
+    performSearch(searchQuery.trim());
   };
 
   const handleSearchFocus = () => {
@@ -118,15 +99,17 @@ function Homepage() {
   };
 
   const handleSuggestionClick = (suggestion) => {
+    if (!suggestion || !suggestion.name) return;
     setSearchQuery(suggestion.name);
     setShowSuggestions(false);
     performSearch(suggestion.name);
   };
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
+    if (!category || !category.id) return;
+    setSelectedCategory(category.name);
     const categoryRecipes = recipes.filter(recipe => 
-      recipe.category.toLowerCase() === category.toLowerCase()
+      recipe.category && recipe.category.toLowerCase() === category.name.toLowerCase()
     );
     setFilteredRecipes(categoryRecipes);
     setIsSearching(true);
@@ -195,6 +178,37 @@ function Homepage() {
 
   const handleAddToCollection = () => {
     alert('Adding to collection: ' + selectedRecipe.name);
+  };
+
+  const performSearch = (query) => {
+    if (!query) {
+      setFilteredRecipes(recipes);
+      return;
+    }
+    
+    setIsLoading(true);
+    setIsSearching(true);
+    
+    const results = recipes.filter(recipe =>
+      (recipe.name && recipe.name.toLowerCase().includes(query.toLowerCase())) ||
+      (recipe.category && recipe.category.toLowerCase().includes(query.toLowerCase())) ||
+      (recipe.ingredients && recipe.ingredients.some(ing => 
+        ing && typeof ing === 'string' && ing.toLowerCase().includes(query.toLowerCase())
+      ))
+    );
+
+    setFilteredRecipes(results);
+    setIsLoading(false);
+  };
+
+  const handleSignOut = async (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (err) {
+      console.error("Error signing out:", err);
+    }
   };
 
   return (
@@ -443,9 +457,13 @@ function Homepage() {
               <h2 className="categories-heading">Categories</h2>
               <div className="categories-grid">
                 {categoriesData.map((category) => (
-                  <div key={category.id} className="category-card" onClick={() => handleCategoryClick(category.id)}>
+                  <div 
+                    key={category.id} 
+                    className="category-card" 
+                    onClick={() => handleCategoryClick(category)}
+                  >
                     <img src={category.image} alt={`${category.name} Category`} />
-                    <span className="category-name">{category.name} </span>
+                    <span className="category-name">{category.name}</span>
                   </div>
                 ))}
               </div>
@@ -490,7 +508,7 @@ function Homepage() {
               <h2>
                 {selectedCategory ? (
                   <>
-                    ({filteredRecipes.length}) {selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
+                    ({filteredRecipes.length}) {selectedCategory}
                   </>
                 ) : (
                   `Search Results: ${searchQuery}`

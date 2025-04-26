@@ -45,7 +45,7 @@ function RecipeDetails() {
         <div className="recipe-meta">
           <span className="recipe-tag">{recipe.category}</span>
           <div className="recipe-stats">
-            <span className="comment-count">Đã có {recipe.comments || 0} bình luận</span>
+            <span className="comment-count">Has {recipe.comments || 0} comments</span>
           </div>
         </div>
       </div>
@@ -61,24 +61,24 @@ function RecipeDetails() {
 
       <div className="recipe-actions">
         <button className="action-button save-button" onClick={handleSave}>
-          <span>{isSaved ? 'Đã Lưu' : 'Lưu Món'}</span>
+          <span>{isSaved ? 'Saved' : 'Save Recipe'}</span>
         </button>
         <button className="action-button" onClick={handleAddToCollection}>
-          <span>Thêm vào bộ sưu tập</span>
+          <span>Add to Collection</span>
         </button>
         <button className="action-button" onClick={handleShare}>
-          <span>Chia sẻ</span>
+          <span>Share</span>
         </button>
         <button className="action-button" onClick={handlePrint}>
-          <span>In</span>
+          <span>Print</span>
         </button>
       </div>
 
       <div className="recipe-sections">
         <div className="ingredients-section">
-          <h2>Nguyên Liệu</h2>
+          <h2>Ingredients</h2>
           <div className="servings-info">
-            <span>{recipe.people || 2} người</span>
+            <span>{recipe.people || 2} servings</span>
           </div>
           <ul className="ingredients-list">
             {(recipe.ingredients || []).map((ingredient, index) => (
@@ -90,9 +90,9 @@ function RecipeDetails() {
         </div>
 
         <div className="instructions-section">
-          <h2>Hướng dẫn cách làm</h2>
+          <h2>Cooking Instructions</h2>
           <div className="cooking-info">
-            <span>⏱️ {recipe.cookingTime || '30 phút'}</span>
+            <span>⏱️ {recipe.cookingTime || '30 minutes'}</span>
           </div>
           <div className="instruction-step">
             <p>{recipe.instruction || 'No instructions available.'}</p>

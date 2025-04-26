@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
+import { auth, storage } from '../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import '../styles/EditProfile.css';
 
 function EditProfile({ userInfo, onSave, onCancel }) {
@@ -9,6 +10,9 @@ function EditProfile({ userInfo, onSave, onCancel }) {
     bio: userInfo.bio || '',
     photoURL: userInfo.photoURL || '',
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewURL, setPreviewURL] = useState(userInfo.photoURL || '');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,23 +22,148 @@ function EditProfile({ userInfo, onSave, onCancel }) {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prevState => ({
-          ...prevState,
-          photoURL: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
     }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Create an image element for compression
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas for compression
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Calculate new dimensions while maintaining aspect ratio
+        const maxDimension = 1200;
+        if (width > height && width > maxDimension) {
+          height = (height * maxDimension) / width;
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = (width * maxDimension) / height;
+          height = maxDimension;
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw and compress image
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to compressed base64
+        const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+        
+        setSelectedFile(file);
+        setPreviewURL(compressedImage);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isUploading) return;
+
+    try {
+      setIsUploading(true);
+
+      let finalPhotoURL = formData.photoURL;
+
+      // If there's a new photo selected, upload it first
+      if (selectedFile) {
+        try {
+          const user = auth.currentUser;
+          if (!user) {
+            throw new Error('No authenticated user found');
+          }
+
+          // Convert the file to base64
+          const reader = new FileReader();
+          const base64Promise = new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+          });
+          reader.readAsDataURL(selectedFile);
+          const base64Image = await base64Promise;
+
+          // Create an image element for compression
+          const img = new Image();
+          const imgPromise = new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          img.src = base64Image;
+          await imgPromise;
+
+          // Create canvas for compression
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions while maintaining aspect ratio
+          const maxDimension = 1200;
+          if (width > height && width > maxDimension) {
+            height = (height * maxDimension) / width;
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = (width * maxDimension) / height;
+            height = maxDimension;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress image
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to compressed base64
+          finalPhotoURL = canvas.toDataURL('image/jpeg', 0.7);
+        } catch (uploadError) {
+          console.error('Error processing photo:', uploadError);
+          alert('Failed to process photo. Please try again.');
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      // Call onSave with all updated data including the new photo URL if changed
+      await onSave({
+        ...formData,
+        photoURL: finalPhotoURL
+      });
+
+      // Reset selected file after successful save
+      setSelectedFile(null);
+      setIsUploading(false);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      alert(error.message || 'Failed to save changes. Please try again.');
+      setIsUploading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset preview and selected file
+    setSelectedFile(null);
+    setPreviewURL(userInfo.photoURL || '');
+    onCancel();
   };
 
   return (
@@ -46,7 +175,7 @@ function EditProfile({ userInfo, onSave, onCancel }) {
       <form onSubmit={handleSubmit} className="edit-profile-form">
         <div className="profile-photo-section">
           <img 
-            src={formData.photoURL} 
+            src={previewURL} 
             alt="Profile" 
             className="profile-photo-preview"
             onError={(e) => {
@@ -55,14 +184,18 @@ function EditProfile({ userInfo, onSave, onCancel }) {
             }}
           />
           <div className="photo-upload">
-            <label htmlFor="photo-upload" className="upload-button">
-              Change Photo
+            <label 
+              htmlFor="photo-upload" 
+              className={`upload-button ${isUploading ? 'uploading' : ''}`}
+            >
+              {isUploading ? 'Uploading...' : (selectedFile ? 'Change Photo Again' : 'Change Photo')}
             </label>
             <input
               type="file"
               id="photo-upload"
               accept="image/*"
               onChange={handlePhotoChange}
+              disabled={isUploading}
               style={{ display: 'none' }}
             />
           </div>
@@ -77,6 +210,8 @@ function EditProfile({ userInfo, onSave, onCancel }) {
             value={formData.displayName}
             onChange={handleChange}
             placeholder="Enter your display name"
+            required
+            disabled={isUploading}
           />
         </div>
 
@@ -89,7 +224,7 @@ function EditProfile({ userInfo, onSave, onCancel }) {
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email"
-            disabled={auth.currentUser?.providerData[0]?.providerId === 'google.com'}
+            disabled={auth.currentUser?.providerData[0]?.providerId === 'google.com' || isUploading}
           />
         </div>
 
@@ -102,15 +237,25 @@ function EditProfile({ userInfo, onSave, onCancel }) {
             onChange={handleChange}
             placeholder="Tell us about yourself"
             rows="4"
+            disabled={isUploading}
           />
         </div>
 
         <div className="form-buttons">
-          <button type="button" className="cancel-button" onClick={onCancel}>
+          <button 
+            type="button" 
+            className="cancel-button" 
+            onClick={handleCancel}
+            disabled={isUploading}
+          >
             Cancel
           </button>
-          <button type="submit" className="save-button">
-            Save Changes
+          <button 
+            type="submit" 
+            className="save-button"
+            disabled={isUploading}
+          >
+            {isUploading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>
