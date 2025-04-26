@@ -4,9 +4,11 @@ import { auth } from '../firebase';
 import { App } from '../App';
 import SignIn from '../components/SignIn';
 import SignUp from '../components/SignUp';
-import Homepage from '../components/Homepage';
+import Homepage from '../screens/Homepage';
 import Recipes from '../components/Recipes';
 import Favorites from '../components/Favorites';
+import RecipeDetails from '../screens/RecipeDetails';
+import PersonalKitchen from '../screens/PersonalKitchen';
 
 // Protected Route wrapper
 const PrivateRoute = ({ children }) => {
@@ -46,6 +48,10 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       />
+
+      {/* Additional Routes */}
+      <Route path="/recipe/:id" element={<RecipeDetails />} />
+      <Route path="/kitchen" element={<PersonalKitchen />} />
 
       {/* Fallback Route */}
       <Route path="*" element={<Navigate to="/signin" />} />
