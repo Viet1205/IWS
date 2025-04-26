@@ -11,9 +11,7 @@ function PersonalKitchen() {
   const [activeItem, setActiveItem] = useState('collection');
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [userRecipes, setUserRecipes] = useState([]);
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [recipeForm, setRecipeForm] = useState({
     name: '',
     category: 'dinner',
@@ -25,24 +23,6 @@ function PersonalKitchen() {
     imagePreview: null
   });
   const fileInputRef = useRef();
-
-  const fetchUserRecipes = async (userId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/recipes/user/${userId}`);
-      if (response.ok) {
-        const recipes = await response.json();
-        setUserRecipes(recipes);
-      } else {
-        console.error('Failed to fetch user recipes');
-        setUserRecipes([]);
-      }
-    } catch (error) {
-      console.error('Error fetching user recipes:', error);
-      setUserRecipes([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
@@ -85,9 +65,6 @@ function PersonalKitchen() {
             ...userData,
             createdAt: userData.createdAt || firebaseUser.metadata.creationTime || new Date().toISOString()
           });
-
-          // Fetch user's recipes after getting user info
-          await fetchUserRecipes(firebaseUser.uid);
         } catch (error) {
           console.error('Error loading user data:', error);
           // Set default user info if backend fails
@@ -102,7 +79,6 @@ function PersonalKitchen() {
             followers: 0
           };
           setUserInfo(defaultUserInfo);
-          setIsLoading(false);
         }
       } else {
         navigate('/');
@@ -464,22 +440,6 @@ function PersonalKitchen() {
     </div>
   );
 
-  const RecipeCard = ({ recipe }) => (
-    <div className="recipe-card" onClick={() => navigate(`/recipe/${recipe.id}`)}>
-      <div className="recipe-card-image">
-        <img src={recipe.image} alt={recipe.name} />
-      </div>
-      <div className="recipe-card-content">
-        <h3>{recipe.name}</h3>
-        <div className="recipe-card-meta">
-          <span>⏱️ {recipe.cookingTime}</span>
-          <span>👥 {recipe.people} servings</span>
-        </div>
-        <div className="recipe-card-category">{recipe.category}</div>
-      </div>
-    </div>
-  );
-
   if (!userInfo) {
     return (
       <div className="personal-kitchen-empty">
@@ -674,23 +634,15 @@ function PersonalKitchen() {
                 <div className="section">
                   <h2>My Recipes</h2>
                   <div className="recipes-grid">
-                    {isLoading ? (
-                      <div className="loading-state">Loading recipes...</div>
-                    ) : userRecipes.length > 0 ? (
-                      userRecipes.map(recipe => (
-                        <RecipeCard key={recipe.id} recipe={recipe} />
-                      ))
-                    ) : (
-                      <div className="empty-state">
-                        <p>No recipes shared yet</p>
-                        <button 
-                          className="primary-button"
-                          onClick={() => setIsCreatingRecipe(true)}
-                        >
-                          Share Your First Recipe
-                        </button>
-                      </div>
-                    )}
+                    <div className="empty-state">
+                      <p>No recipes shared yet</p>
+                      <button 
+                        className="primary-button"
+                        onClick={() => setIsCreatingRecipe(true)}
+                      >
+                        Share Your First Recipe
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

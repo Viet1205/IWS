@@ -2,6 +2,8 @@ const express = require("express");
 const fs = require("fs").promises;
 const cors = require("cors");
 const path = require("path");
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 const port = 5000;
@@ -39,6 +41,30 @@ const writeFile = async (filePath, data) => {
 };
 
 // Categories Endpoints
+
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get all categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: List of all categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   category:
+ *                     type: string
+ *       500:
+ *         description: Failed to read categories
+ */
 app.get("/api/categories", async (req, res) => {
   try {
     const categories = await readFile(categoriesFile);
@@ -48,6 +74,37 @@ app.get("/api/categories", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/categories:
+ *   post:
+ *     summary: Create a new category
+ *     tags: [Categories]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 description: Name of the category
+ *     responses:
+ *       201:
+ *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 category:
+ *                   type: string
+ *       500:
+ *         description: Failed to create category
+ */
 app.post("/api/categories", async (req, res) => {
   try {
     const categories = await readFile(categoriesFile);
@@ -63,6 +120,46 @@ app.post("/api/categories", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   put:
+ *     summary: Update a category by ID
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The category ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 description: Updated name of the category
+ *     responses:
+ *       200:
+ *         description: Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 category:
+ *                   type: string
+ *       404:
+ *         description: Category not found
+ *       500:
+ *         description: Failed to update category
+ */
 app.put("/api/categories/:id", async (req, res) => {
   try {
     const categories = await readFile(categoriesFile);
@@ -79,6 +176,32 @@ app.put("/api/categories/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/categories/{id}:
+ *   delete:
+ *     summary: Delete a category by ID
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The category ID
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to delete category
+ */
 app.delete("/api/categories/:id", async (req, res) => {
   try {
     const categories = await readFile(categoriesFile);
@@ -92,6 +215,42 @@ app.delete("/api/categories/:id", async (req, res) => {
 });
 
 // Recipes Endpoints
+
+/**
+ * @swagger
+ * /api/recipes:
+ *   get:
+ *     summary: Get all recipes
+ *     tags: [Recipes]
+ *     responses:
+ *       200:
+ *         description: List of all recipes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   author:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                   image:
+ *                     type: string
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   instruction:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *       500:
+ *         description: Failed to read recipes
+ */
 app.get("/api/recipes", async (req, res) => {
   try {
     const recipes = await readFile(recipesFile);
@@ -101,6 +260,60 @@ app.get("/api/recipes", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/recipes:
+ *   post:
+ *     summary: Create a new recipe
+ *     tags: [Recipes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               author:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               instruction:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Recipe created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 author:
+ *                   type: string
+ *                 category:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 ingredients:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 instruction:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *       500:
+ *         description: Failed to create recipe
+ */
 app.post("/api/recipes", async (req, res) => {
   try {
     const recipes = await readFile(recipesFile);
@@ -124,6 +337,69 @@ app.post("/api/recipes", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/recipes/{id}:
+ *   put:
+ *     summary: Update a recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               author:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *               ingredients:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               instruction:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Recipe updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 author:
+ *                   type: string
+ *                 category:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 ingredients:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 instruction:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *       404:
+ *         description: Recipe not found
+ *       500:
+ *         description: Failed to update recipe
+ */
 app.put("/api/recipes/:id", async (req, res) => {
   try {
     const recipes = await readFile(recipesFile);
@@ -140,6 +416,32 @@ app.put("/api/recipes/:id", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/recipes/{id}:
+ *   delete:
+ *     summary: Delete a recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: Recipe deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *S       500:
+ *         description: Failed to delete recipe
+ */
 app.delete("/api/recipes/:id", async (req, res) => {
   try {
     const recipes = await readFile(recipesFile);
@@ -153,6 +455,44 @@ app.delete("/api/recipes/:id", async (req, res) => {
 });
 
 // Comments Endpoints
+
+/**
+ * @swagger
+ * /api/comments/{recipeId}:
+ *   get:
+ *     summary: Get comments for a specific recipe
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: recipeId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: List of comments for the recipe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   recipeId:
+ *                     type: string
+ *                   authorId:
+ *                     type: string
+ *                   content:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Failed to read comments
+ */
 app.get("/api/comments/:recipeId", async (req, res) => {
   try {
     const comments = await readFile(commentsFile);
@@ -165,6 +505,47 @@ app.get("/api/comments/:recipeId", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/comments:
+ *   post:
+ *     summary: Create a new comment for a recipe
+ *     tags: [Comments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recipeId:
+ *                 type: string
+ *               authorId:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Comment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 recipeId:
+ *                   type: string
+ *                 authorId:
+ *                   type: string
+ *                 content:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       500:
+ *         description: Failed to create comment
+ */
 app.post("/api/comments", async (req, res) => {
   try {
     const comments = await readFile(commentsFile);
@@ -183,6 +564,32 @@ app.post("/api/comments", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/comments/{id}:
+ *   delete:
+ *     summary: Delete a comment by ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The comment ID
+ *     responses:
+ *       200:
+ *         description: Comment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to delete comment
+ */
 app.delete("/api/comments/:id", async (req, res) => {
   try {
     const comments = await readFile(commentsFile);
@@ -197,6 +604,42 @@ app.delete("/api/comments/:id", async (req, res) => {
 });
 
 // Likes Endpoints
+
+/**
+ * @swagger
+ * /api/likes/{recipeId}:
+ *   get:
+ *     summary: Get likes for a specific recipe
+ *     tags: [Likes]
+ *     parameters:
+ *       - in: path
+ *         name: recipeId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: List of likes for the recipe
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   recipeId:
+ *                     type: string
+ *                   userId:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Failed to read likes
+ */
 app.get("/api/likes/:recipeId", async (req, res) => {
   try {
     const likes = await readFile(likesFile);
@@ -209,6 +652,45 @@ app.get("/api/likes/:recipeId", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/likes:
+ *   post:
+ *     summary: Like a recipe
+ *     tags: [Likes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               recipeId:
+ *                 type: string
+ *               userId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Like created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 recipeId:
+ *                   type: string
+ *                 userId:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: User already liked this recipe
+ *       500:
+ *         description: Failed to create like
+ */
 app.post("/api/likes", async (req, res) => {
   try {
     const likes = await readFile(likesFile);
@@ -233,6 +715,38 @@ app.post("/api/likes", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/likes/{recipeId}/{userId}:
+ *   delete:
+ *     summary: Unlike a recipe
+ *     tags: [Likes]
+ *     parameters:
+ *       - in: path
+ *         name: recipeId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The recipe ID
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: Like removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to remove like
+ */
 app.delete("/api/likes/:recipeId/:userId", async (req, res) => {
   try {
     const likes = await readFile(likesFile);
@@ -247,6 +761,59 @@ app.delete("/api/likes/:recipeId/:userId", async (req, res) => {
 });
 
 // Follows Endpoints
+
+/**
+ * @swagger
+ * /api/follows/{userId}:
+ *   get:
+ *     summary: Get followers and following for a user
+ *     tags: [Follows]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: Follow relationships for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 following:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       followerId:
+ *                         type: string
+ *                       followingId:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                 followers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       followerId:
+ *                         type: string
+ *                       followingId:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *       500:
+ *         description: Failed to read follows
+ */
 app.get("/api/follows/:userId", async (req, res) => {
   try {
     const follows = await readFile(followsFile);
@@ -260,6 +827,45 @@ app.get("/api/follows/:userId", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/follows:
+ *   post:
+ *     summary: Follow a user
+ *     tags: [Follows]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               followerId:
+ *                 type: string
+ *               followingId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Follow created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 followerId:
+ *                   type: string
+ *                 followingId:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Already following this user
+ *       500:
+ *         description: Failed to create follow
+ */
 app.post("/api/follows", async (req, res) => {
   try {
     const follows = await readFile(followsFile);
@@ -286,6 +892,38 @@ app.post("/api/follows", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/follows/{followerId}/{followingId}:
+ *   delete:
+ *     summary: Unfollow a user
+ *     tags: [Follows]
+ *     parameters:
+ *       - in: path
+ *         name: followerId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The follower ID
+ *       - in: path
+ *         name: followingId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The following ID
+ *     responses:
+ *       200:
+ *         description: Unfollowed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Failed to unfollow
+ */
 app.delete("/api/follows/:followerId/:followingId", async (req, res) => {
   try {
     const follows = await readFile(followsFile);
@@ -302,6 +940,46 @@ app.delete("/api/follows/:followerId/:followingId", async (req, res) => {
 });
 
 // Users Endpoints
+
+/**
+ * @swagger
+ * /api/users/{uid}:
+ *   get:
+ *     summary: Get a user by UID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: uid
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user UID
+ *     responses:
+ *       200:
+ *         description: User details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: string
+ *                 displayName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 photoURL:
+ *                   type: string
+ *                 bio:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to read user
+ */
 app.get("/api/users/:uid", async (req, res) => {
   try {
     const users = await readFile(usersFile);
@@ -315,6 +993,55 @@ app.get("/api/users/:uid", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/users:
+ *   post:
+ *     summary: Create a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               uid:
+ *                 type: string
+ *               displayName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               photoURL:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: string
+ *                 displayName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 photoURL:
+ *                   type: string
+ *                 bio:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: User already exists
+ *       500:
+ *         description: Failed to create user
+ */
 app.post("/api/users", async (req, res) => {
   try {
     const users = await readFile(usersFile);
@@ -338,6 +1065,60 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/users/{uid}:
+ *   put:
+ *     summary: Update a user by UID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: uid
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user UID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               displayName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               photoURL:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: string
+ *                 displayName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 photoURL:
+ *                   type: string
+ *                 bio:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Failed to update user
+ */
 app.put("/api/users/:uid", async (req, res) => {
   try {
     const users = await readFile(usersFile);
@@ -368,6 +1149,49 @@ app.put("/api/users/:uid", async (req, res) => {
 });
 
 // Search Endpoint
+
+/**
+ * @swagger
+ * /api/search:
+ *   get:
+ *     summary: Search recipes by query
+ *     tags: [Search]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Search query (e.g., recipe name, category, ingredients)
+ *     responses:
+ *       200:
+ *         description: List of matching recipes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   author:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                   image:
+ *                     type: string
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   instruction:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *       500:
+ *         description: Failed to search recipes
+ */
 app.get("/api/search", async (req, res) => {
   try {
     const { query } = req.query;
@@ -418,7 +1242,40 @@ app.get("/api/search", async (req, res) => {
   }
 });
 
-// Suggestions endpoint
+// Suggestions Endpoint
+
+/**
+ * @swagger
+ * /api/suggestions:
+ *   get:
+ *     summary: Get recipe suggestions based on query
+ *     tags: [Search]
+ *     parameters:
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Search query for suggestions (optional)
+ *     responses:
+ *       200:
+ *         description: List of suggested recipes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *       500:
+ *         description: Failed to get suggestions
+ */
 app.get("/api/suggestions", async (req, res) => {
   try {
     const { query } = req.query;
@@ -478,7 +1335,68 @@ app.get("/api/suggestions", async (req, res) => {
   }
 });
 
-// Get specific recipe by ID
+/**
+ * @swagger
+ * /api/recipes/{id}:
+ *   get:
+ *     summary: Get a specific recipe by ID
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The recipe ID
+ *     responses:
+ *       200:
+ *         description: Recipe details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 author:
+ *                   type: string
+ *                 category:
+ *                   type: string
+ *                 image:
+ *                   type: string
+ *                 ingredients:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 instruction:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 comments:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       recipeId:
+ *                         type: string
+ *                       authorId:
+ *                         type: string
+ *                       content:
+ *                         type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                 likes:
+ *                   type: integer
+ *                 isLiked:
+ *                   type: boolean
+ *       404:
+ *         description: Recipe not found
+ *       500:
+ *         description: Failed to fetch recipe
+ */
 app.get("/api/recipes/:id", async (req, res) => {
   try {
     const recipes = await readFile(recipesFile);
@@ -519,6 +1437,28 @@ app.get("/api/recipes/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch recipe" });
   }
 });
+
+// Swagger Configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Cooking App API',
+      version: '1.0.0',
+      description: 'API documentation for Cooking App',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000',
+      },
+    ],
+  },
+  // Update the path to point to server.js (relative to the server directory)
+  apis: ['./server.js'], // Since server.js is in the server directory
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Start server
 app.listen(port, () => {
