@@ -6,11 +6,9 @@ import logo from "../assets/logo.jpg"; // Import the logo
 import recipesData from "../server/recipes.json";
 import categoriesData from "../server/categories.json";
 import userData from "../server/users.json";
-import commentsData from "../server/comments.json";
 import SearchSuggestions from "../components/SearchSuggestions";
 import Sidebar from './Sidebar'; // Import Sidebar
 import '../styles/RecipeDetails.css';
-import '../styles/CommentPopup.css';
 
 function Homepage() {
   const navigate = useNavigate();
@@ -30,9 +28,6 @@ function Homepage() {
   const [userInfo, setUserInfo] = useState(null);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
-  const [showCommentPopup, setShowCommentPopup] = useState(false);
-  const [comments, setComments] = useState(commentsData);
-  const [newComment, setNewComment] = useState("");
 
   // Default avatar URL for when author photo is not available
   const defaultAvatar = "https://img.icons8.com/ios-filled/50/ef6c00/user.png";
@@ -242,17 +237,9 @@ function Homepage() {
     navigate('/kitchen', { state: { activeTab: 'saved' } });
   };
 
-  const handleCommentClick = () => {
-    setShowCommentPopup(true);
-  };
+ 
 
-  // Load comments from localStorage on initial load
-  useEffect(() => {
-    const savedComments = localStorage.getItem('comments');
-    if (savedComments) {
-      setComments(JSON.parse(savedComments));
-    }
-  }, []);
+  
 
   // Format date to Vietnamese format
   const formatDate = (dateString) => {
@@ -266,114 +253,7 @@ function Homepage() {
     return `lúc ${hours}:${minutes} ${day} tháng ${month}, ${year}`;
   };
 
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    if (!newComment.trim() || !selectedRecipe?.id || !userInfo) return;
-
-    const newCommentData = {
-      id: `comment_${Date.now()}`,
-      recipeId: selectedRecipe.id,
-      authorId: userInfo.id,
-      content: newComment.trim(),
-      createdAt: new Date().toISOString()
-    };
-
-    // Thêm comment mới vào state và comments.json
-    const updatedComments = [...comments, newCommentData];
-    setComments(updatedComments);
-
-    // Clear input
-    setNewComment("");
-  };
-
-  const CommentForm = React.memo(({ onSubmit }) => {
-    return (
-      <form onSubmit={onSubmit} className="comment-form">
-        <div className="comment-input-container">
-          <img 
-            src={userInfo?.photoURL || defaultAvatar} 
-            alt={userInfo?.displayName || "User"} 
-            className="comment-avatar" 
-          />
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Viết bình luận..."
-            className="comment-input"
-            autoFocus
-          />
-        </div>
-        <button 
-          type="submit" 
-          className="comment-submit-button"
-          disabled={!newComment.trim()}
-        >
-          Gửi
-        </button>
-      </form>
-    );
-  });
-
-  const CommentPopup = ({ recipeId, onClose }) => {
-    const recipeComments = comments.filter(comment => comment.recipeId === recipeId);
-
-    const renderComment = (comment) => {
-      // Nếu là comment có sẵn từ file (có userId), giữ nguyên thông tin
-      if (comment.userId) {
-        const user = users.find(u => u.id === comment.userId);
-        return (
-          <div key={comment.id} className="comment-item">
-            <div className="comment-user">
-              <img 
-                src={user?.photoURL || defaultAvatar} 
-                alt={user?.displayName || "User"} 
-                className="comment-avatar" 
-              />
-              <span className="comment-username">{user?.displayName || "Người dùng"}</span>
-            </div>
-            <p className="comment-content">{comment.content}</p>
-            <span className="comment-time">{formatDate(comment.createdAt)}</span>
-          </div>
-        );
-      }
-      
-      // Nếu là comment mới (có authorId), sử dụng thông tin từ userInfo
-      return (
-        <div key={comment.id} className="comment-item">
-          <div className="comment-user">
-            <img 
-              src={userInfo?.photoURL || defaultAvatar} 
-              alt={userInfo?.name || "User"} 
-              className="comment-avatar" 
-            />
-            <span className="comment-username">{userInfo?.name || "Người dùng"}</span>
-          </div>
-          <p className="comment-content">{comment.content}</p>
-          <span className="comment-time">{formatDate(comment.createdAt)}</span>
-        </div>
-      );
-    };
-
-    return (
-      <div className="comment-popup-overlay">
-        <div className="comment-popup">
-          <div className="comment-popup-header">
-            <h3>Bình luận</h3>
-            <button onClick={onClose} className="close-button">×</button>
-          </div>
-          <div className="comment-list">
-            {recipeComments.length > 0 ? (
-              recipeComments.map(comment => renderComment(comment))
-            ) : (
-              <p className="no-comments">Chưa có bình luận nào</p>
-            )}
-          </div>
-          <CommentForm onSubmit={handleCommentSubmit} />
-        </div>
-      </div>
-    );
-  };
+  
 
   return (
     <div className="homepage">
@@ -439,9 +319,7 @@ function Homepage() {
               <h1 className="recipe-title">{selectedRecipe.name}</h1>
               <div className="recipe-meta">
                 <span className="recipe-tag">{selectedRecipe.category}</span>
-                <div className="recipe-stats">
-                  <span onClick={handleCommentClick} className="comment-count">Đã có {selectedRecipe.comments || 0} bình luận</span>
-                </div>
+             
               </div>
             </div>
 
@@ -612,12 +490,8 @@ function Homepage() {
         )}
       </div>
 
-      {showCommentPopup && (
-        <CommentPopup
-          recipeId={selectedRecipe?.id}
-          onClose={() => setShowCommentPopup(false)}
-        />
-      )}
+     
+      
     </div>
   );
 }
