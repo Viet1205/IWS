@@ -555,66 +555,7 @@ function PersonalKitchen() {
           />
           <span>Search</span>
         </div>
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "premium" ? "active" : ""}`}
-          onClick={() => setActiveItem("premium")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/crown.png"
-            alt="Premium Icon"
-          />
-          <span>Premium</span>
-        </div> */}
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "stats" ? "active" : ""}`}
-          onClick={() => setActiveItem("stats")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/statistics.png"
-            alt="Stats Icon"
-          />
-          <span>Recipe Stats</span>
-        </div> */}
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "challenges" ? "active" : ""}`}
-          onClick={() => setActiveItem("challenges")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/trophy.png"
-            alt="Challenges Icon"
-          />
-          <span>Challenges</span>
-        </div> */}
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "collection" ? "active" : ""}`}
-          onClick={() => setActiveItem("collection")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/bookmark.png"
-            alt="Collection Icon"
-          />
-          <span>Your Collection</span>
-        </div> */}
-
-        {/* <div className="sidebar-item">
-          <span style={{ marginLeft: "28px", fontSize: "0.9rem", color: "#888" }}>ALL RECIPES</span>
-        </div> */}
-
-        <div 
-          className={`sidebar-item ${activeItem === "recipes" ? "active" : ""}`}
-          onClick={() => setActiveItem("recipes")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png"
-            alt="Recipes Icon"
-          />
-          <span>All Recipes</span>
-        </div>
-
+        
         <div 
           className={`sidebar-item ${activeItem === "saved" ? "active" : ""}`}
           onClick={handleSavedClick}
@@ -625,24 +566,12 @@ function PersonalKitchen() {
           />
           <span>Saved</span>
         </div>
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "cooked" ? "active" : ""}`}
-          onClick={() => setActiveItem("cooked")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/checked-checkbox.png"
-            alt="Cooked Icon"
-          />
-          <span>Cooked</span>
-        </div> */}
-
         <div 
           className={`sidebar-item ${activeItem === "my-recipes" ? "active" : ""}`}
           onClick={() => setActiveItem("my-recipes")}
         >
           <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/user-cooking.png"
+            src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png"
             alt="Your Recipes Icon"
           />
           <span>Your Recipes</span>
