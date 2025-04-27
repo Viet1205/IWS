@@ -24,15 +24,7 @@ function Sidebar({ activeItem, setActiveItem }) {
         <img src="https://img.icons8.com/ios-filled/50/ef6c00/search.png" alt="Search Icon" />
         <span>Search</span>
       </div>
-
-      <div
-        className={`sidebar-item ${activeItem === "recipes" ? "active" : ""}`}
-        onClick={() => handleNavigation("recipes", "/home")}
-      >
-        <img src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png" alt="Recipes Icon" />
-        <span>All Recipes</span>
-      </div>
-
+      
       <div
         className={`sidebar-item ${activeItem === "saved" ? "active" : ""}`}
         onClick={() => handleNavigation("saved", "/kitchen", { activeTab: "saved" })}
@@ -45,7 +37,7 @@ function Sidebar({ activeItem, setActiveItem }) {
         className={`sidebar-item ${activeItem === "my-recipes" ? "active" : ""}`}
         onClick={() => handleNavigation("my-recipes", "/kitchen", { activeTab: "my-recipes" })}
       >
-        <img src="https://img.icons8.com/ios-filled/50/ef6c00/user-cooking.png" alt="Your Recipes Icon" />
+        <img src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png" alt="Your Recipes Icon" />
         <span>Your Recipes</span>
       </div>
     </div>

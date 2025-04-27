@@ -456,13 +456,7 @@ function Homepage() {
 
             <div className="recipe-actions">
               <button className="action-button save-button" onClick={handleSave}>
-                <span>{isSaved ? 'Đã Lưu' : 'Lưu Món'}</span>
-              </button>
-              <button className="action-button" onClick={handleAddToCollection}>
-                <span>Thêm vào bộ sưu tập</span>
-              </button>
-              <button className="action-button" onClick={handleShare}>
-                <span>Chia sẻ</span>
+                <span>{isSaved ? 'Saved' : 'Save'}</span>
               </button>
               <button className="action-button" onClick={handlePrint}>
                 <span>In</span>
@@ -471,7 +465,7 @@ function Homepage() {
 
             <div className="recipe-sections">
               <div className="ingredients-section">
-                <h2>Nguyên Liệu</h2>
+                <h2>Ingredients</h2>
                 <div className="servings-info">
                   <span>{selectedRecipe.people || 2} người</span>
                 </div>
@@ -485,7 +479,7 @@ function Homepage() {
               </div>
 
               <div className="instructions-section">
-                <h2>Hướng dẫn cách làm</h2>
+                <h2>Instructions</h2>
                 <div className="cooking-info">
                   <span>⏱️ {selectedRecipe.cookingTime || '30 phút'}</span>
                 </div>
