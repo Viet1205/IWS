@@ -8,7 +8,7 @@ import Homepage from "./screens/Homepage";
 import PersonalKitchen from "./screens/PersonalKitchen";
 import RecipeDetail from "./screens/RecipeDetail";
 import userData from "./server/users.json";
-import "./styles.css";
+import "./styles.css"; // Moved to the top
 
 // Protected Route wrapper component
 function PrivateRoute({ children }) {
@@ -56,10 +56,7 @@ function AuthWrapper() {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<SignIn />} />
-      <Route path="/signup" element={
-      
-          <SignUp />
-      } />
+      <Route path="/signup" element={<SignUp />} />
 
       {/* Protected Routes */}
       <Route path="/home" element={

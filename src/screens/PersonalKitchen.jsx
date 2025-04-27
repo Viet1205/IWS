@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { auth, updateProfile } from '../firebase';
 import logo from "../assets/logo.jpg";
 import EditProfile from './EditProfile';
@@ -8,10 +8,15 @@ import '../styles/RecipeMaking.css';
 
 function PersonalKitchen() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeItem, setActiveItem] = useState('collection');
   const [isEditing, setIsEditing] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [userRecipes, setUserRecipes] = useState([]);
+  const [savedRecipes, setSavedRecipes] = useState([]);
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [recipeForm, setRecipeForm] = useState({
     name: '',
     category: 'dinner',
@@ -23,8 +28,14 @@ function PersonalKitchen() {
     imagePreview: null
   });
   const fileInputRef = useRef();
+  const modalRef = useRef();
 
   useEffect(() => {
+    // Check if we have a state parameter from navigation
+    if (location.state?.activeTab) {
+      setActiveItem(location.state.activeTab);
+    }
+
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -86,7 +97,49 @@ function PersonalKitchen() {
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, location.state]);
+
+  // Fetch user's recipes
+  useEffect(() => {
+    const fetchUserRecipes = async () => {
+      if (!userInfo) return;
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/recipes');
+        if (!response.ok) {
+          throw new Error('Failed to fetch recipes');
+        }
+        const recipes = await response.json();
+        // Filter recipes by the current user
+        const userRecipes = recipes.filter(recipe => recipe.author === userInfo.displayName);
+        setUserRecipes(userRecipes);
+      } catch (error) {
+        console.error('Error fetching user recipes:', error);
+      }
+    };
+
+    fetchUserRecipes();
+  }, [userInfo]);
+
+  // Add function to fetch saved recipes
+  useEffect(() => {
+    const fetchSavedRecipes = () => {
+      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes')) || [];
+      setSavedRecipes(savedRecipes);
+    };
+
+    fetchSavedRecipes();
+
+    // Listen for changes in localStorage to dynamically update saved recipes
+    const handleStorageChange = () => {
+      fetchSavedRecipes();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const handleSaveProfile = async (updatedData) => {
     try {
@@ -292,8 +345,11 @@ function PersonalKitchen() {
         imagePreview: null
       });
   
+      // Add the new recipe to userRecipes
+      setUserRecipes(prevRecipes => [...prevRecipes, savedRecipe]);
+      
+      setIsCreatingRecipe(false);
       alert('Recipe saved successfully!');
-      navigate('/recipe/' + savedRecipe.id);  // Assuming the saved recipe has an 'id'
   
     } catch (error) {
       console.error('Error saving recipe:', error);
@@ -301,6 +357,30 @@ function PersonalKitchen() {
     }
   };
   
+  const handleRecipeClick = (recipe) => {
+    setSelectedRecipe(recipe);
+    setIsModalVisible(true);
+    // Add a class to prevent body scrolling
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setSelectedRecipe(null);
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';
+  };
+
+  // Close modal when clicking outside
+  const handleOverlayClick = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      closeModal();
+    }
+  };
+
+  const handleSavedClick = () => {
+    setActiveItem("saved");
+  };
 
   const renderRecipeMakingScreen = () => (
     <div className="recipe-making-container">
@@ -452,7 +532,8 @@ function PersonalKitchen() {
     <div className="homepage">
       {/* Sidebar */}
       <div className="sidebar">
-        <div className="sidebar-logo">
+        <div className="sidebar-logo"
+        onClick={() => navigate('/home')}>
           <img
             src={logo}
             alt="Cooking App Logo"
@@ -463,7 +544,10 @@ function PersonalKitchen() {
 
         <div 
           className={`sidebar-item ${activeItem === "search" ? "active" : ""}`}
-          onClick={() => setActiveItem("search")}
+          onClick={() => {
+            navigate('/home')
+            setActiveItem("search")
+          }}
         >
           <img
             src="https://img.icons8.com/ios-filled/50/ef6c00/search.png"
@@ -472,7 +556,7 @@ function PersonalKitchen() {
           <span>Search</span>
         </div>
 
-        <div 
+        {/* <div 
           className={`sidebar-item ${activeItem === "premium" ? "active" : ""}`}
           onClick={() => setActiveItem("premium")}
         >
@@ -481,9 +565,9 @@ function PersonalKitchen() {
             alt="Premium Icon"
           />
           <span>Premium</span>
-        </div>
+        </div> */}
 
-        <div 
+        {/* <div 
           className={`sidebar-item ${activeItem === "stats" ? "active" : ""}`}
           onClick={() => setActiveItem("stats")}
         >
@@ -492,9 +576,9 @@ function PersonalKitchen() {
             alt="Stats Icon"
           />
           <span>Recipe Stats</span>
-        </div>
+        </div> */}
 
-        <div 
+        {/* <div 
           className={`sidebar-item ${activeItem === "challenges" ? "active" : ""}`}
           onClick={() => setActiveItem("challenges")}
         >
@@ -503,9 +587,9 @@ function PersonalKitchen() {
             alt="Challenges Icon"
           />
           <span>Challenges</span>
-        </div>
+        </div> */}
 
-        <div 
+        {/* <div 
           className={`sidebar-item ${activeItem === "collection" ? "active" : ""}`}
           onClick={() => setActiveItem("collection")}
         >
@@ -514,11 +598,11 @@ function PersonalKitchen() {
             alt="Collection Icon"
           />
           <span>Your Collection</span>
-        </div>
+        </div> */}
 
-        <div className="sidebar-item">
+        {/* <div className="sidebar-item">
           <span style={{ marginLeft: "28px", fontSize: "0.9rem", color: "#888" }}>ALL RECIPES</span>
-        </div>
+        </div> */}
 
         <div 
           className={`sidebar-item ${activeItem === "recipes" ? "active" : ""}`}
@@ -533,16 +617,16 @@ function PersonalKitchen() {
 
         <div 
           className={`sidebar-item ${activeItem === "saved" ? "active" : ""}`}
-          onClick={() => setActiveItem("saved")}
+          onClick={handleSavedClick}
         >
           <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/hearts.png"
+            src="https://img.icons8.com/ios-filled/50/ef6c00/bookmark.png"
             alt="Saved Icon"
           />
           <span>Saved</span>
         </div>
 
-        <div 
+        {/* <div 
           className={`sidebar-item ${activeItem === "cooked" ? "active" : ""}`}
           onClick={() => setActiveItem("cooked")}
         >
@@ -551,7 +635,7 @@ function PersonalKitchen() {
             alt="Cooked Icon"
           />
           <span>Cooked</span>
-        </div>
+        </div> */}
 
         <div 
           className={`sidebar-item ${activeItem === "my-recipes" ? "active" : ""}`}
@@ -623,33 +707,160 @@ function PersonalKitchen() {
               </div>
               
               <div className="kitchen-content">
-                <div className="section">
-                  <h2>About Me</h2>
-                  <div className="about-details">
-                    <p><strong>Email:</strong> {userInfo.email}</p>
-                    <p><strong>Joined:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-
-                <div className="section">
-                  <h2>My Recipes</h2>
-                  <div className="recipes-grid">
-                    <div className="empty-state">
-                      <p>No recipes shared yet</p>
-                      <button 
-                        className="primary-button"
-                        onClick={() => setIsCreatingRecipe(true)}
-                      >
-                        Share Your First Recipe
-                      </button>
+                {activeItem === 'saved' ? (
+                  <div className="section">
+                    <h2>Saved Recipes</h2>
+                    <div className="recipes-grid">
+                      {savedRecipes.length === 0 ? (
+                        <div className="empty-state">
+                          <p>No saved recipes yet</p>
+                        </div>
+                      ) : (
+                        <div className="recipes-list">
+                          {savedRecipes.map((recipe) => (
+                            <div key={recipe.id} className="recipe-card" onClick={() => handleRecipeClick(recipe)}>
+                              <div className="recipe-image">
+                                <img src={recipe.image} alt={recipe.name} />
+                              </div>
+                              <div className="recipe-info">
+                                <h3>{recipe.name}</h3>
+                                <div className="recipe-metadata">
+                                  <span className="cooking-time">
+                                    <img src="https://img.icons8.com/ios-filled/50/000000/time.png" alt="time" />
+                                    {recipe.cookingTime}
+                                  </span>
+                                  <span className="servings">
+                                    <img src="https://img.icons8.com/ios-filled/50/000000/restaurant.png" alt="servings" />
+                                    {recipe.people} servings
+                                  </span>
+                                </div>
+                                <div className="recipe-category">
+                                  <span>{recipe.category}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="section">
+                      <h2>About Me</h2>
+                      <div className="about-details">
+                        <p><strong>Email:</strong> {userInfo.email}</p>
+                        <p><strong>Joined:</strong> {new Date(userInfo.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+
+                    <div className="section">
+                      <h2>My Recipes</h2>
+                      <div className="recipes-grid">
+                        {userRecipes.length === 0 ? (
+                          <div className="empty-state">
+                            <p>No recipes shared yet</p>
+                          </div>
+                        ) : (
+                          <div className="recipes-list">
+                            {userRecipes.map((recipe) => (
+                              <div key={recipe.id} className="recipe-card" onClick={() => handleRecipeClick(recipe)}>
+                                <div className="recipe-image">
+                                  <img src={recipe.image} alt={recipe.name} />
+                                </div>
+                                <div className="recipe-info">
+                                  <h3>{recipe.name}</h3>
+                                  <div className="recipe-metadata">
+                                    <span className="cooking-time">
+                                      <img src="https://img.icons8.com/ios-filled/50/000000/time.png" alt="time" />
+                                      {recipe.cookingTime}
+                                    </span>
+                                    <span className="servings">
+                                      <img src="https://img.icons8.com/ios-filled/50/000000/restaurant.png" alt="servings" />
+                                      {recipe.people} servings
+                                    </span>
+                                  </div>
+                                  <div className="recipe-category">
+                                    <span>{recipe.category}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           )}
         </div>
       </div>
+      
+      {/* Recipe Detail Modal */}
+      {isModalVisible && selectedRecipe && (
+        <div 
+          className={`recipe-modal-overlay ${isModalVisible ? 'visible' : ''}`}
+          onClick={handleOverlayClick}
+        >
+          <div 
+            className={`recipe-modal ${isModalVisible ? 'visible' : ''}`}
+            ref={modalRef}
+          >
+            <div className="recipe-modal-header">
+              <h2 className="recipe-modal-title">{selectedRecipe.name}</h2>
+              <button className="recipe-modal-close" onClick={closeModal}>×</button>
+            </div>
+            <div className="recipe-modal-content">
+              <img 
+                src={selectedRecipe.image} 
+                alt={selectedRecipe.name}
+                className="recipe-modal-image"
+              />
+              
+              <div className="recipe-modal-metadata">
+                <span>
+                  <img src="https://img.icons8.com/ios-filled/50/000000/time.png" alt="time" />
+                  {selectedRecipe.cookingTime}
+                </span>
+                <span>
+                  <img src="https://img.icons8.com/ios-filled/50/000000/restaurant.png" alt="servings" />
+                  {selectedRecipe.people} servings
+                </span>
+                <span>
+                  <img src="https://img.icons8.com/ios-filled/50/000000/category.png" alt="category" />
+                  {selectedRecipe.category}
+                </span>
+              </div>
+
+              <div className="recipe-modal-section">
+                <h3>Ingredients</h3>
+                <ul className="recipe-ingredients-list">
+                  {selectedRecipe.ingredients.map((ingredient, index) => (
+                    <li key={index}>{ingredient}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="recipe-modal-section">
+                <h3>Instructions</h3>
+                <div className="recipe-instructions">
+                  {selectedRecipe.instruction}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Action Button */}
+      <button 
+        className="create-recipe-fab"
+        onClick={() => setIsCreatingRecipe(true)}
+      >
+        +
+      </button>
     </div>
   );
 }

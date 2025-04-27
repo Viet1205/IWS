@@ -1,0 +1,132 @@
+.saved-recipes-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.saved-recipes-container h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.saved-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.saved-recipe-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.saved-recipe-card:hover {
+  transform: translateY(-4px);
+}
+
+.recipe-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.recipe-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recipe-info {
+  padding: 1.5rem;
+}
+
+.recipe-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.recipe-info p {
+  margin: 0 0 1rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.recipe-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.recipe-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.view-recipe {
+  background-color: #ef6c00;
+  color: white;
+}
+
+.view-recipe:hover {
+  background-color: #d45a00;
+}
+
+.remove-saved {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.remove-saved:hover {
+  background-color: #e0e0e0;
+}
+
+.no-saved-recipes {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-saved-recipes p {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.no-saved-recipes button {
+  padding: 0.75rem 1.5rem;
+  background-color: #ef6c00;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.no-saved-recipes button:hover {
+  background-color: #d45a00;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #d32f2f;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin: 2rem;
+} 

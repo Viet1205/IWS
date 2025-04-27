@@ -444,25 +444,72 @@ h1, h2, h3 {
   font-family: 'Playfair Display', serif;
 }
 
-.recipe-grid {
+/* Homepage recipe grid */
+.recipe-section .recipe-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 24px;
   padding: 10px;
 }
 
+.recipe-section .recipe-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.recipes-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding: 10px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #ef6c00 #f5f5f5;
+}
+
+.recipes-grid .recipe-card {
+  flex: 0 0 250px;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.recipes-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.recipes-grid::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.recipes-grid::-webkit-scrollbar-thumb {
+  background: #ef6c00;
+  border-radius: 4px;
+}
+
+.recipes-list {
+  display: flex;
+  gap: 20px;
+  min-width: min-content;
+}
+
 .recipe-card {
   background: white;
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
+  transition: transform 0.3s ease;
+  margin-bottom: 20px;
 }
 
 .recipe-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
 }
 
 .recipe-card img {
@@ -1000,16 +1047,23 @@ h1, h2, h3 {
 }
 
 .kitchen-content {
-  display: grid;
-  grid-template-columns: 300px 1fr;
+  display: flex; /* Change to flex for better control */
+  flex-direction: column; /* Stack children vertically */
   gap: 24px;
+  height: 100%; /* Ensure it takes full height */
 }
 
 .section {
+  flex-grow: 1; /* Allow the section to grow and fill available space */
+  display: flex; /* Use flexbox for content alignment */
+  flex-direction: column; /* Stack content vertically */
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
   background: white;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Allow scrolling if content overflows */
 }
 
 .section h2 {

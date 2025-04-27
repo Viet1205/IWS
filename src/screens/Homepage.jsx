@@ -6,8 +6,11 @@ import logo from "../assets/logo.jpg"; // Import the logo
 import recipesData from "../server/recipes.json";
 import categoriesData from "../server/categories.json";
 import userData from "../server/users.json";
+import commentsData from "../server/comments.json";
 import SearchSuggestions from "../components/SearchSuggestions";
+import Sidebar from './Sidebar'; // Import Sidebar
 import '../styles/RecipeDetails.css';
+import '../styles/CommentPopup.css';
 
 function Homepage() {
   const navigate = useNavigate();
@@ -27,6 +30,9 @@ function Homepage() {
   const [userInfo, setUserInfo] = useState(null);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [showCommentPopup, setShowCommentPopup] = useState(false);
+  const [comments, setComments] = useState(commentsData);
+  const [newComment, setNewComment] = useState("");
 
   // Default avatar URL for when author photo is not available
   const defaultAvatar = "https://img.icons8.com/ios-filled/50/ef6c00/user.png";
@@ -165,6 +171,27 @@ function Homepage() {
   };
 
   const handleSave = () => {
+    if (!selectedRecipe) return;
+  
+    // Get the current saved recipes from localStorage
+    const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes')) || [];
+  
+    // Check if the recipe is already saved
+    const isAlreadySaved = savedRecipes.some(recipe => recipe.id === selectedRecipe.id);
+  
+    if (isAlreadySaved) {
+      // If already saved, remove it
+      const updatedRecipes = savedRecipes.filter(recipe => recipe.id !== selectedRecipe.id);
+      localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+      alert('Recipe removed from saved recipes.');
+    } else {
+      // If not saved, add it
+      const updatedRecipes = [...savedRecipes, selectedRecipe];
+      localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+      alert('Recipe saved successfully!');
+    }
+  
+    // Update the saved state
     setIsSaved(!isSaved);
   };
 
@@ -211,125 +238,146 @@ function Homepage() {
     }
   };
 
-  return (
-    <div className="homepage">
-      <div className="sidebar">
-        <div className="sidebar-logo">
-          <img
-            src={logo}
-            alt="Cooking App Logo"
-            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-          />
-          <span>Cooking App</span>
-        </div>
+  const handleSavedClick = () => {
+    navigate('/kitchen', { state: { activeTab: 'saved' } });
+  };
 
-        {/* Main Navigation */}
-        <div 
-          className={`sidebar-item ${activeItem === "search" ? "active" : ""}`}
-          onClick={() => setActiveItem("search")}
+  const handleCommentClick = () => {
+    setShowCommentPopup(true);
+  };
+
+  // Load comments from localStorage on initial load
+  useEffect(() => {
+    const savedComments = localStorage.getItem('comments');
+    if (savedComments) {
+      setComments(JSON.parse(savedComments));
+    }
+  }, []);
+
+  // Format date to Vietnamese format
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    
+    return `lúc ${hours}:${minutes} ${day} tháng ${month}, ${year}`;
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (!newComment.trim() || !selectedRecipe?.id || !userInfo) return;
+
+    const newCommentData = {
+      id: `comment_${Date.now()}`,
+      recipeId: selectedRecipe.id,
+      authorId: userInfo.id,
+      content: newComment.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    // Thêm comment mới vào state và comments.json
+    const updatedComments = [...comments, newCommentData];
+    setComments(updatedComments);
+
+    // Clear input
+    setNewComment("");
+  };
+
+  const CommentForm = React.memo(({ onSubmit }) => {
+    return (
+      <form onSubmit={onSubmit} className="comment-form">
+        <div className="comment-input-container">
+          <img 
+            src={userInfo?.photoURL || defaultAvatar} 
+            alt={userInfo?.displayName || "User"} 
+            className="comment-avatar" 
+          />
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Viết bình luận..."
+            className="comment-input"
+            autoFocus
+          />
+        </div>
+        <button 
+          type="submit" 
+          className="comment-submit-button"
+          disabled={!newComment.trim()}
         >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/search.png"
-            alt="Search Icon"
-          />
-          <span>Search</span>
-        </div>
+          Gửi
+        </button>
+      </form>
+    );
+  });
 
-        <div 
-          className={`sidebar-item ${activeItem === "premium" ? "active" : ""}`}
-          onClick={() => setActiveItem("premium")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/crown.png"
-            alt="Premium Icon"
-          />
-          <span>Premium</span>
-        </div>
+  const CommentPopup = ({ recipeId, onClose }) => {
+    const recipeComments = comments.filter(comment => comment.recipeId === recipeId);
 
-        <div 
-          className={`sidebar-item ${activeItem === "stats" ? "active" : ""}`}
-          onClick={() => setActiveItem("stats")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/statistics.png"
-            alt="Stats Icon"
-          />
-          <span>Recipe Stats</span>
+    const renderComment = (comment) => {
+      // Nếu là comment có sẵn từ file (có userId), giữ nguyên thông tin
+      if (comment.userId) {
+        const user = users.find(u => u.id === comment.userId);
+        return (
+          <div key={comment.id} className="comment-item">
+            <div className="comment-user">
+              <img 
+                src={user?.photoURL || defaultAvatar} 
+                alt={user?.displayName || "User"} 
+                className="comment-avatar" 
+              />
+              <span className="comment-username">{user?.displayName || "Người dùng"}</span>
+            </div>
+            <p className="comment-content">{comment.content}</p>
+            <span className="comment-time">{formatDate(comment.createdAt)}</span>
+          </div>
+        );
+      }
+      
+      // Nếu là comment mới (có authorId), sử dụng thông tin từ userInfo
+      return (
+        <div key={comment.id} className="comment-item">
+          <div className="comment-user">
+            <img 
+              src={userInfo?.photoURL || defaultAvatar} 
+              alt={userInfo?.name || "User"} 
+              className="comment-avatar" 
+            />
+            <span className="comment-username">{userInfo?.name || "Người dùng"}</span>
+          </div>
+          <p className="comment-content">{comment.content}</p>
+          <span className="comment-time">{formatDate(comment.createdAt)}</span>
         </div>
+      );
+    };
 
-        <div 
-          className={`sidebar-item ${activeItem === "challenges" ? "active" : ""}`}
-          onClick={() => setActiveItem("challenges")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/trophy.png"
-            alt="Challenges Icon"
-          />
-          <span>Challenges</span>
-        </div>
-
-        {/* Collection Section */}
-        <div 
-          className={`sidebar-item ${activeItem === "collection" ? "active" : ""}`}
-          onClick={() => setActiveItem("collection")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/bookmark.png"
-            alt="Collection Icon"
-          />
-          <span>Your Collection</span>
-        </div>
-
-        <div className="sidebar-item">
-          <span style={{ marginLeft: "28px", fontSize: "0.9rem", color: "#888" }}>ALL RECIPES</span>
-        </div>
-
-        {/* Recipe Categories */}
-        <div 
-          className={`sidebar-item ${activeItem === "recipes" ? "active" : ""}`}
-          onClick={() => setActiveItem("recipes")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png"
-            alt="Recipes Icon"
-          />
-          <span>All Recipes</span>
-        </div>
-
-        <div 
-          className={`sidebar-item ${activeItem === "saved" ? "active" : ""}`}
-          onClick={() => setActiveItem("saved")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/hearts.png"
-            alt="Saved Icon"
-          />
-          <span>Saved</span>
-        </div>
-
-        <div 
-          className={`sidebar-item ${activeItem === "cooked" ? "active" : ""}`}
-          onClick={() => setActiveItem("cooked")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/checked-checkbox.png"
-            alt="Cooked Icon"
-          />
-          <span>Cooked</span>
-        </div>
-
-        <div 
-          className={`sidebar-item ${activeItem === "my-recipes" ? "active" : ""}`}
-          onClick={() => setActiveItem("my-recipes")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/user-cooking.png"
-            alt="Your Recipes Icon"
-          />
-          <span>Your Recipes</span>
+    return (
+      <div className="comment-popup-overlay">
+        <div className="comment-popup">
+          <div className="comment-popup-header">
+            <h3>Bình luận</h3>
+            <button onClick={onClose} className="close-button">×</button>
+          </div>
+          <div className="comment-list">
+            {recipeComments.length > 0 ? (
+              recipeComments.map(comment => renderComment(comment))
+            ) : (
+              <p className="no-comments">Chưa có bình luận nào</p>
+            )}
+          </div>
+          <CommentForm onSubmit={handleCommentSubmit} />
         </div>
       </div>
+    );
+  };
 
+  return (
+    <div className="homepage">
+      <Sidebar activeItem={activeItem} setActiveItem={setActiveItem} />
       <div className="main-content">
         <div className="top-bar">
           <div className="search-container">
@@ -392,7 +440,7 @@ function Homepage() {
               <div className="recipe-meta">
                 <span className="recipe-tag">{selectedRecipe.category}</span>
                 <div className="recipe-stats">
-                  <span className="comment-count">Đã có {selectedRecipe.comments || 0} bình luận</span>
+                  <span onClick={handleCommentClick} className="comment-count">Đã có {selectedRecipe.comments || 0} bình luận</span>
                 </div>
               </div>
             </div>
@@ -563,6 +611,13 @@ function Homepage() {
           </div>
         )}
       </div>
+
+      {showCommentPopup && (
+        <CommentPopup
+          recipeId={selectedRecipe?.id}
+          onClose={() => setShowCommentPopup(false)}
+        />
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ const commentsFile = path.join(__dirname, "comments.json");
 const likesFile = path.join(__dirname, "likes.json");
 const followsFile = path.join(__dirname, "follows.json");
 const usersFile = path.join(__dirname, "users.json");
+const savedRecipesFile = path.join(__dirname, "savedRecipes.json");
 
 // Helper functions to read/write JSON files
 const readFile = async (filePath) => {
@@ -273,6 +274,8 @@ app.get("/api/recipes", async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
+ *               userId:
+ *                 type: string
  *               author:
  *                 type: string
  *               category:
@@ -319,20 +322,23 @@ app.post("/api/recipes", async (req, res) => {
     const recipes = await readFile(recipesFile);
     const newRecipe = {
       id: recipes.length ? recipes[recipes.length - 1].id + 1 : 1,
+      userId: req.body.userId,
       author: req.body.author,
       category: req.body.category,
       image: req.body.image,
       ingredients: req.body.ingredients,
       instruction: req.body.instruction,
       name: req.body.name,
+      cookingTime: req.body.cookingTime,
+      people: req.body.people
     };
     recipes.push(newRecipe);
     await writeFile(recipesFile, recipes);
     
-    console.log("[✅ Recipe Created]", newRecipe); // Success log
+    console.log("[✅ Recipe Created]", newRecipe);
     res.status(201).json(newRecipe);
   } catch (err) {
-    console.error("[❌ Failed to Create Recipe]", err); // Error log
+    console.error("[❌ Failed to Create Recipe]", err);
     res.status(500).json({ error: "Failed to create recipe" });
   }
 });
@@ -439,7 +445,7 @@ app.put("/api/recipes/:id", async (req, res) => {
  *               properties:
  *                 message:
  *                   type: string
- *S       500:
+ *       500:
  *         description: Failed to delete recipe
  */
 app.delete("/api/recipes/:id", async (req, res) => {
@@ -451,6 +457,61 @@ app.delete("/api/recipes/:id", async (req, res) => {
     res.json({ message: "Recipe deleted" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete recipe" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/recipes/user/{userId}:
+ *   get:
+ *     summary: Get recipes for a specific user
+ *     tags: [Recipes]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The user ID
+ *     responses:
+ *       200:
+ *         description: List of recipes for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   author:
+ *                     type: string
+ *                   userId:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                   image:
+ *                     type: string
+ *                   ingredients:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   instruction:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *       500:
+ *         description: Failed to read recipes
+ */
+app.get("/api/recipes/user/:userId", async (req, res) => {
+  try {
+    const recipes = await readFile(recipesFile);
+    const userRecipes = recipes.filter(recipe => recipe.userId === req.params.userId);
+    res.json(userRecipes);
+  } catch (err) {
+    console.error("[❌ Failed to fetch user recipes]", err);
+    res.status(500).json({ error: "Failed to read recipes" });
   }
 });
 
@@ -1435,6 +1496,128 @@ app.get("/api/recipes/:id", async (req, res) => {
   } catch (err) {
     console.error("[❌ Failed to fetch recipe]", err);
     res.status(500).json({ error: "Failed to fetch recipe" });
+  }
+});
+
+// Saved Recipes Endpoints
+
+/**
+ * @swagger
+ * /api/saved-recipes:
+ *   get:
+ *     summary: Get all saved recipes for a user
+ *     tags: [Saved Recipes]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of saved recipes
+ *       500:
+ *         description: Failed to read saved recipes
+ */
+app.get("/api/saved-recipes", async (req, res) => {
+  try {
+    const { userId } = req.query;
+    const savedRecipes = await readFile(savedRecipesFile);
+    const userSavedRecipes = savedRecipes.filter(recipe => recipe.userId === userId);
+    res.json(userSavedRecipes);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to read saved recipes" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/saved-recipes:
+ *   post:
+ *     summary: Save a recipe for a user
+ *     tags: [Saved Recipes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               recipeId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Recipe saved successfully
+ *       500:
+ *         description: Failed to save recipe
+ */
+app.post("/api/saved-recipes", async (req, res) => {
+  try {
+    const { userId, recipeId } = req.body;
+    const savedRecipes = await readFile(savedRecipesFile);
+    
+    // Check if recipe is already saved
+    const existingSave = savedRecipes.find(
+      save => save.userId === userId && save.recipeId === recipeId
+    );
+    
+    if (existingSave) {
+      return res.status(400).json({ error: "Recipe already saved" });
+    }
+
+    const newSave = {
+      id: Date.now().toString(),
+      userId,
+      recipeId,
+      savedAt: new Date().toISOString()
+    };
+
+    savedRecipes.push(newSave);
+    await writeFile(savedRecipesFile, savedRecipes);
+    res.status(201).json(newSave);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save recipe" });
+  }
+});
+
+/**
+ * @swagger
+ * /api/saved-recipes:
+ *   delete:
+ *     summary: Remove a saved recipe
+ *     tags: [Saved Recipes]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: recipeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Recipe removed successfully
+ *       500:
+ *         description: Failed to remove recipe
+ */
+app.delete("/api/saved-recipes", async (req, res) => {
+  try {
+    const { userId, recipeId } = req.query;
+    const savedRecipes = await readFile(savedRecipesFile);
+    
+    const updatedSavedRecipes = savedRecipes.filter(
+      save => !(save.userId === userId && save.recipeId === recipeId)
+    );
+    
+    await writeFile(savedRecipesFile, updatedSavedRecipes);
+    res.json({ message: "Recipe removed from saved" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove recipe" });
   }
 });
 
