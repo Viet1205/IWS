@@ -130,7 +130,7 @@ app.post("/api/categories", async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The category ID
  *     requestBody:
@@ -152,7 +152,7 @@ app.post("/api/categories", async (req, res) => {
  *               type: object
  *               properties:
  *                 id:
- *                   type: integer
+ *                   type: string
  *                 category:
  *                   type: string
  *       404:
@@ -186,7 +186,7 @@ app.put("/api/categories/:id", async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The category ID
  *     responses:
@@ -347,7 +347,7 @@ app.post("/api/recipes", async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The recipe ID
  *     requestBody:
@@ -380,7 +380,7 @@ app.post("/api/recipes", async (req, res) => {
  *               type: object
  *               properties:
  *                 id:
- *                   type: integer
+ *                   type: string
  *                 author:
  *                   type: string
  *                 category:
@@ -426,7 +426,7 @@ app.put("/api/recipes/:id", async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The recipe ID
  *     responses:
@@ -1345,7 +1345,7 @@ app.get("/api/suggestions", async (req, res) => {
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
  *         required: true
  *         description: The recipe ID
  *     responses:
@@ -1357,7 +1357,7 @@ app.get("/api/suggestions", async (req, res) => {
  *               type: object
  *               properties:
  *                 id:
- *                   type: integer
+ *                   type: string
  *                 author:
  *                   type: string
  *                 category:
