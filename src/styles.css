@@ -1047,16 +1047,23 @@ h1, h2, h3 {
 }
 
 .kitchen-content {
-  display: grid;
-  grid-template-columns: 300px 1fr;
+  display: flex; /* Change to flex for better control */
+  flex-direction: column; /* Stack children vertically */
   gap: 24px;
+  height: 100%; /* Ensure it takes full height */
 }
 
 .section {
+  flex-grow: 1; /* Allow the section to grow and fill available space */
+  display: flex; /* Use flexbox for content alignment */
+  flex-direction: column; /* Stack content vertically */
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
   background: white;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto; /* Allow scrolling if content overflows */
 }
 
 .section h2 {

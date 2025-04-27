@@ -7,7 +7,7 @@ import SignUp from '../components/SignUp';
 import Homepage from '../screens/Homepage';
 import Recipes from '../components/Recipes';
 import Favorites from '../components/Favorites';
-import RecipeDetails from '../screens/RecipeDetails';
+//import RecipeDetails from '../screens/RecipeDetails';
 import PersonalKitchen from '../screens/PersonalKitchen';
 
 // Protected Route wrapper

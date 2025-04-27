@@ -123,23 +123,23 @@ function PersonalKitchen() {
 
   // Add function to fetch saved recipes
   useEffect(() => {
-    const fetchSavedRecipes = async () => {
-      if (!userInfo) return;
-      
-      try {
-        const response = await fetch(`http://localhost:5000/api/users/${userInfo.id}/saved-recipes`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch saved recipes');
-        }
-        const savedRecipes = await response.json();
-        setSavedRecipes(savedRecipes);
-      } catch (error) {
-        console.error('Error fetching saved recipes:', error);
-      }
+    const fetchSavedRecipes = () => {
+      const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes')) || [];
+      setSavedRecipes(savedRecipes);
     };
 
     fetchSavedRecipes();
-  }, [userInfo]);
+
+    // Listen for changes in localStorage to dynamically update saved recipes
+    const handleStorageChange = () => {
+      fetchSavedRecipes();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const handleSaveProfile = async (updatedData) => {
     try {

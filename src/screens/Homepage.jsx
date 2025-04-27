@@ -8,6 +8,7 @@ import categoriesData from "../server/categories.json";
 import userData from "../server/users.json";
 import commentsData from "../server/comments.json";
 import SearchSuggestions from "../components/SearchSuggestions";
+import Sidebar from './Sidebar'; // Import Sidebar
 import '../styles/RecipeDetails.css';
 import '../styles/CommentPopup.css';
 
@@ -170,6 +171,27 @@ function Homepage() {
   };
 
   const handleSave = () => {
+    if (!selectedRecipe) return;
+  
+    // Get the current saved recipes from localStorage
+    const savedRecipes = JSON.parse(localStorage.getItem('savedRecipes')) || [];
+  
+    // Check if the recipe is already saved
+    const isAlreadySaved = savedRecipes.some(recipe => recipe.id === selectedRecipe.id);
+  
+    if (isAlreadySaved) {
+      // If already saved, remove it
+      const updatedRecipes = savedRecipes.filter(recipe => recipe.id !== selectedRecipe.id);
+      localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+      alert('Recipe removed from saved recipes.');
+    } else {
+      // If not saved, add it
+      const updatedRecipes = [...savedRecipes, selectedRecipe];
+      localStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+      alert('Recipe saved successfully!');
+    }
+  
+    // Update the saved state
     setIsSaved(!isSaved);
   };
 
@@ -355,128 +377,7 @@ function Homepage() {
 
   return (
     <div className="homepage">
-      <div className="sidebar">
-        <div className="sidebar-logo"
-          onClick={() => navigate('/homepage')}
-        >
-          <img
-            src={logo}
-            alt="Cooking App Logo"
-            style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-          />
-          <span>Cooking App</span>
-        </div>
-
-        {/* Main Navigation */}
-        <div 
-          className={`sidebar-item ${activeItem === "search" ? "active" : ""}`}
-          onClick={() => {
-            setActiveItem("search");
-            navigate('/homepage');
-          }}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/search.png"
-            alt="Search Icon"
-          />
-          <span>Search</span>
-        </div>
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "premium" ? "active" : ""}`}
-          onClick={() => setActiveItem("premium")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/crown.png"
-            alt="Premium Icon"
-          />
-          <span>Premium</span>
-        </div> */}
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "stats" ? "active" : ""}`}
-          onClick={() => setActiveItem("stats")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/statistics.png"
-            alt="Stats Icon"
-          />
-          <span>Recipe Stats</span>
-        </div> */}
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "challenges" ? "active" : ""}`}
-          onClick={() => setActiveItem("challenges")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/trophy.png"
-            alt="Challenges Icon"
-          />
-          <span>Challenges</span>
-        </div> */}
-
-        {/* Collection Section */}
-        {/* <div 
-          className={`sidebar-item ${activeItem === "collection" ? "active" : ""}`}
-          onClick={() => setActiveItem("collection")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/bookmark.png"
-            alt="Collection Icon"
-          />
-          <span>Your Collection</span>
-        </div> */}
-
-        {/* <div className="sidebar-item">
-          <span style={{ marginLeft: "28px", fontSize: "0.9rem", color: "#888" }}>ALL RECIPES</span>
-        </div> */}
-
-        {/* Recipe Categories */}
-        <div 
-          className={`sidebar-item ${activeItem === "recipes" ? "active" : ""}`}
-          onClick={() => setActiveItem("recipes")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/cookbook.png"
-            alt="Recipes Icon"
-          />
-          <span>All Recipes</span>
-        </div>
-
-        <div 
-          className={`sidebar-item ${activeItem === "saved" ? "active" : ""}`}
-          onClick={handleSavedClick}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/bookmark.png"
-            alt="Saved Icon"
-          />
-          <span>Saved</span>
-        </div>
-
-        {/* <div 
-          className={`sidebar-item ${activeItem === "cooked" ? "active" : ""}`}
-          onClick={() => setActiveItem("cooked")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/checked-checkbox.png"
-            alt="Cooked Icon"
-          />
-          <span>Cooked</span>
-        </div> */}
-
-        <div 
-          className={`sidebar-item ${activeItem === "my-recipes" ? "active" : ""}`}
-          onClick={() => setActiveItem("my-recipes")}
-        >
-          <img
-            src="https://img.icons8.com/ios-filled/50/ef6c00/user-cooking.png"
-            alt="Your Recipes Icon"
-          />
-          <span>Your Recipes</span>
-        </div>
-      </div>
-
+      <Sidebar activeItem={activeItem} setActiveItem={setActiveItem} />
       <div className="main-content">
         <div className="top-bar">
           <div className="search-container">
